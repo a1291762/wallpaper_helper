@@ -7,7 +7,7 @@ from Ui_ImageWindow import *
 
 class ImageWindow(QMainWindow, Ui_ImageWindow):
 
-	image = None
+	_image = None
 
 	def __init__(self):
 		super(ImageWindow, self).__init__()
@@ -20,9 +20,11 @@ class ImageWindow(QMainWindow, Ui_ImageWindow):
 		self.deskWidth.setText("%d" % desktopWidth)
 		self.deskHeight.setText("%d" % desktopHeight)
 
-		self.deskWidth.textChanged.connect(self.deskWidthChanged)
-		self.deskHeight.textChanged.connect(self.deskHeightChanged)
-		self.setDesktopFrame()
+		self.deskWidth.textChanged.connect(self._deskWidthChanged)
+		self.deskHeight.textChanged.connect(self._deskHeightChanged)
+		self._setDesktopFrame()
+
+		#print("wallpaper path "+self.wallpaper.path)
 
 	def dragEnterEvent(self, e):
 		self.label.setText(e.mimeData().text())
@@ -34,39 +36,39 @@ class ImageWindow(QMainWindow, Ui_ImageWindow):
 
 	def dropEvent(self, e):
 		file = QUrl(e.mimeData().text()).toLocalFile().strip()
-		self.image = QImage(file)
-		assert(self.image.isNull() == False)
-		self.setImageOnLabel()
+		self._image = QImage(file)
+		assert(self._image.isNull() == False)
+		self._setImageOnLabel()
 		e.accept()
 
 	def resizeEvent(self, e):
-		if (self.image != None):
-			self.setImageOnLabel()
+		if (self._image != None):
+			self._setImageOnLabel()
 
-	def setImageOnLabel(self):
-		assert(self.image != None)
-		assert(self.image.isNull() == False)
-		image = self.image.scaled(
+	def _setImageOnLabel(self):
+		assert(self._image != None)
+		assert(self._image.isNull() == False)
+		image = self._image.scaled(
 			self.label.width(),
 			self.label.height(),
 			QtCore.Qt.KeepAspectRatio)
 		assert(image.isNull() == False)
 		self.label.setImage(image)
 
-	def deskWidthChanged(self):
+	def _deskWidthChanged(self):
 		print("desk width changed")
-		self.setDesktopFrame()
+		self._setDesktopFrame()
 
-	def deskHeightChanged(self):
+	def _deskHeightChanged(self):
 		print("desk height changed")
-		self.setDesktopFrame()
+		self._setDesktopFrame()
 
 	def closeEvent(self, e):
 		settings = QSettings()
 		settings.setValue("desktopWidth", self.deskWidth.text())
 		settings.setValue("desktopHeight", self.deskHeight.text())
 
-	def setDesktopFrame(self):
+	def _setDesktopFrame(self):
 		self.label.setDesktop(
 			int(self.deskWidth.text()),
 			int(self.deskHeight.text()))

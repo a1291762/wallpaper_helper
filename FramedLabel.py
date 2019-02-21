@@ -1,66 +1,66 @@
 #!/usr/bin/python3
 
 import sys
-from PySide.QtGui import *
 from PySide.QtCore import *
+from PySide.QtGui import *
 
 class FramedLabel(QLabel):
 
-	desktopWidth = 1
-	desktopHeight = 1
-	image = None
-	frameRect = None
+	_desktopWidth = 1
+	_desktopHeight = 1
+	_image = None
+	_frameRect = None
 
 	def __init__(self, text):
 		super(FramedLabel, self).__init__(text)
 		self.setMinimumSize(1, 1)
 
 	def setText(self, text):
-		self.image = None
+		self._image = None
 		super(FramedLabel, self).setText(text)
 
 	def setImage(self, image):
-		self.image = image
+		self._image = image
 		pixmap = QPixmap.fromImage(image)
 		assert(pixmap.isNull() == False)
 		self.setPixmap(pixmap)
-		self.setFrameRect()
+		self._setFrameRect()
 
 	def setDesktop(self, width, height):
-		self.desktopWidth = width
-		self.desktopHeight = height
-		self.setFrameRect()
+		self._desktopWidth = width
+		self._desktopHeight = height
+		self._setFrameRect()
 
 	def resizeEvent(self, e):
-		if (self.image != None):
-			self.setFrameRect()
+		if (self._image != None):
+			self._setFrameRect()
 
-	def setFrameRect(self):
-		self.frameRect = None
-		if (self.image == None):
+	def _setFrameRect(self):
+		self._frameRect = None
+		if (self._image == None):
 			return
 
 		x = 0
 		y = 0
-		width = self.image.height() / self.desktopHeight * self.desktopWidth
-		if (width > self.image.width()):
-			width = self.image.width()
-		height = self.image.width() / self.desktopWidth * self.desktopHeight
-		if (height > self.image.height()):
-			height = self.image.height()
+		width = self._image.height() / self._desktopHeight * self._desktopWidth
+		if (width > self._image.width()):
+			width = self._image.width()
+		height = self._image.width() / self._desktopWidth * self._desktopHeight
+		if (height > self._image.height()):
+			height = self._image.height()
 		x = self.width() / 2 - (width / 2)
 		y = self.height() / 2 - (height / 2)
-		self.frameRect = QRect(x, y, width - 1, height - 1)
+		self._frameRect = QRect(x, y, width - 1, height - 1)
 
 	def paintEvent(self, e):
 		super(FramedLabel, self).paintEvent(e)
-		if (self.frameRect == None):
+		if (self._frameRect == None):
 			return
 
 		p = QPainter()
 		p.begin(self)
 
 		p.setPen(Qt.yellow)
-		p.drawRect(self.frameRect)
+		p.drawRect(self._frameRect)
 
 		p.end()
