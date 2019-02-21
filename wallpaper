@@ -5,6 +5,8 @@ from PySide.QtGui import *
 from ImageWindow import *
 
 app = QApplication(sys.argv)
+app.setOrganizationName("OpenGear")
+app.setApplicationName("WallpaperHelper")
 
 window = ImageWindow()
 window.show()
