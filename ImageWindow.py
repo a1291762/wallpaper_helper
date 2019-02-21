@@ -15,9 +15,10 @@ class ImageWindow(QMainWindow):
 		super().__init__()
 		self.ui = Ui_ImageWindow()
 		self.ui.setupUi(self)
-		#self.ui.label.installEventFilter(self)
-		#self.centralWidget().installEventFilter(self)
-		self.installEventFilter(self)
+
+		# focus the label and listen for keyboard events from it
+		self.ui.label.setFocus()
+		self.ui.label.installEventFilter(self)
 
 		desktop = QDesktopWidget()
 		settings = QSettings()
@@ -76,7 +77,8 @@ class ImageWindow(QMainWindow):
 		if (not isinstance(e, QKeyEvent)):
 			#print("is not a key event")
 			return False
-		if (e.type() != QEvent.ShortcutOverride):
+		#print(e.type())
+		if (e.type() != QEvent.KeyPress):
 			return False
 
 		switcher = {
