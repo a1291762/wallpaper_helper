@@ -30,7 +30,11 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="deskWidth"/>
+         <widget class="QLineEdit" name="deskWidth">
+          <property name="focusPolicy">
+           <enum>Qt::ClickFocus</enum>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLabel" name="label_3">
@@ -40,7 +44,11 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="deskHeight"/>
+         <widget class="QLineEdit" name="deskHeight">
+          <property name="focusPolicy">
+           <enum>Qt::ClickFocus</enum>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -102,6 +110,9 @@
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::StrongFocus</enum>
       </property>
       <property name="text">
        <string>Drop an image onto the window</string>
