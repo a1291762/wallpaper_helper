@@ -3,64 +3,69 @@
 import sys
 from PySide.QtCore import *
 from PySide.QtGui import *
+from QPainter import *
 
 class FramedLabel(QLabel):
+	"""Label that draws a crop indication on an image.
 
-	_desktopWidth = 1
-	_desktopHeight = 1
-	_image = None
-	_frameRect = None
+	Works like a QLabel but if you call setImage() then a
+	yellow border will be drawn to indicate the way in which
+	the image will be cropped.
 
-	def __init__(self, text):
-		super(FramedLabel, self).__init__(text)
-		self.setMinimumSize(1, 1)
+	Call setDesktop() to set the desktop size.
+	"""
+
+	desktopWidth = 1
+	desktopHeight = 1
+	image = None
+	frameRect = None
+
+	def __init__(self, text: str):
+		super().__init__(text)
+		self.setMinimumSize(1, 1) # allow resizing smaller!
 
 	def setText(self, text):
-		self._image = None
-		super(FramedLabel, self).setText(text)
+		self.image = None
+		super().setText(text)
 
-	def setImage(self, image):
-		self._image = image
+	def setImage(self, image: QImage):
+		self.image = image
 		pixmap = QPixmap.fromImage(image)
 		assert(pixmap.isNull() == False)
 		self.setPixmap(pixmap)
 		self._setFrameRect()
 
-	def setDesktop(self, width, height):
-		self._desktopWidth = width
-		self._desktopHeight = height
+	def setDesktop(self, width: int, height: int):
+		self.desktopWidth = width
+		self.desktopHeight = height
 		self._setFrameRect()
 
 	def resizeEvent(self, e):
-		if (self._image != None):
+		if (self.image != None):
 			self._setFrameRect()
 
 	def _setFrameRect(self):
-		self._frameRect = None
-		if (self._image == None):
+		self.frameRect = None
+		if (self.image == None):
 			return
 
 		x = 0
 		y = 0
-		width = self._image.height() / self._desktopHeight * self._desktopWidth
-		if (width > self._image.width()):
-			width = self._image.width()
-		height = self._image.width() / self._desktopWidth * self._desktopHeight
-		if (height > self._image.height()):
-			height = self._image.height()
+		width = self.image.height() / self.desktopHeight * self.desktopWidth
+		if (width > self.image.width()):
+			width = self.image.width()
+		height = self.image.width() / self.desktopWidth * self.desktopHeight
+		if (height > self.image.height()):
+			height = self.image.height()
 		x = self.width() / 2 - (width / 2)
 		y = self.height() / 2 - (height / 2)
-		self._frameRect = QRect(x, y, width - 1, height - 1)
+		self.frameRect = QRect(x, y, width - 1, height - 1)
 
 	def paintEvent(self, e):
-		super(FramedLabel, self).paintEvent(e)
-		if (self._frameRect == None):
+		super().paintEvent(e) # text or pixmap
+		if (self.frameRect == None):
 			return
 
-		p = QPainter()
-		p.begin(self)
-
-		p.setPen(Qt.yellow)
-		p.drawRect(self._frameRect)
-
-		p.end()
+		with QPainter(self) as p:
+			p.setPen(Qt.yellow)
+			p.drawRect(self.frameRect)
