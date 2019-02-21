@@ -67,7 +67,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="wallpaper">
+         <widget class="PathButton" name="wallpaper">
           <property name="text">
            <string>None</string>
           </property>
@@ -85,7 +85,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="originals">
+         <widget class="PathButton" name="originals">
           <property name="text">
            <string>None</string>
           </property>
@@ -119,6 +119,11 @@
    <class>FramedLabel</class>
    <extends>QLabel</extends>
    <header>FramedLabel.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PathButton</class>
+   <extends>QPushButton</extends>
+   <header>PathButton.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

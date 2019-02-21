@@ -25,7 +25,9 @@ class ImageWindow(QMainWindow):
 		self.ui.deskHeight.textChanged.connect(self._setDesktopFrame)
 		self._setDesktopFrame()
 
-		#print("wallpaper path "+self.wallpaper.path)
+		self.ui.wallpaper.setSettingsKey("wallpaper");
+		print("wallpaper path "+self.ui.wallpaper.path)
+		self.ui.originals.setSettingsKey("originals");
 
 	def dragEnterEvent(self, e):
 		self.ui.label.setText(e.mimeData().text())
