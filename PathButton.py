@@ -6,30 +6,37 @@ from PySide.QtGui import *
 from os.path import basename
 
 class PathButton(QPushButton):
+	"""A button that represents a path.
 
-	name = None
+	You must call setSettingsKey() for the button to work.
+	The text of the button is the last part of the path only.
+	Click the button to get a chooser.
+	If no path is set, the button is red.
+	"""
+
+	settingsKey = None
 	path = None
 
 	def __init__(self, parent):
 		super().__init__(parent)
 
-	def setSettingsKey(self, name):
-		self.name = name
+	def setSettingsKey(self, settingsKey):
+		self.settingsKey = settingsKey
 		settings = QSettings()
-		self.setPath(settings.value(name))
-		self.clicked.connect(self.pathClicked)
+		self._setPath(settings.value(settingsKey))
+		self.clicked.connect(self._pathClicked)
 
-	def setPath(self, path):
+	def _setPath(self, path):
 		self.path = path
 		if (path):
 			self.setText(basename(path))
 			self.setStyleSheet("")
 			settings = QSettings()
-			settings.setValue(self.name, path)
+			settings.setValue(self.settingsKey, path)
 		else:
 			self.setStyleSheet("background-color:red")
 
-	def pathClicked(self):
-		newPath = QFileDialog.getExistingDirectory(None, "Select the "+self.name+" folder", self.path)
+	def _pathClicked(self):
+		newPath = QFileDialog.getExistingDirectory(None, "Select the "+self.settingsKey+" folder", self.path)
 		if (len(newPath) > 0):
-			self.setPath(newPath)
+			self._setPath(newPath)
