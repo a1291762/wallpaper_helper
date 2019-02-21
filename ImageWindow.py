@@ -64,6 +64,7 @@ class ImageWindow(QMainWindow):
 	def _loadFromPath(self, path):
 		#print("wallpaper path "+path)
 		files = os.listdir(path)
+		files.sort()
 		if (len(files) == 0):
 			print("No files?!")
 			return
@@ -99,6 +100,7 @@ class ImageWindow(QMainWindow):
 	def _selectPreviousImage(self):
 		path = os.path.dirname(self.imagePath)
 		files = os.listdir(path)
+		files.sort()
 		lastFile = None
 		for file in reversed(files):
 			if (lastFile == self.imagePath):
@@ -112,6 +114,7 @@ class ImageWindow(QMainWindow):
 	def _selectNextImage(self):
 		path = os.path.dirname(self.imagePath)
 		files = os.listdir(path)
+		files.sort()
 		lastFile = None
 		for file in files:
 			if (lastFile == self.imagePath):
