@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>709</width>
-    <height>541</height>
+    <width>803</width>
+    <height>471</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -96,7 +96,7 @@
      </layout>
     </item>
     <item>
-     <widget class="QLabel" name="label">
+     <widget class="FramedLabel" name="label">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -114,6 +114,13 @@
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FramedLabel</class>
+   <extends>QLabel</extends>
+   <header>FramedLabel.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

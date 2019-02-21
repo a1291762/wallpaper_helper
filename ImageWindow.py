@@ -7,10 +7,11 @@ from Ui_ImageWindow import *
 
 class ImageWindow(QMainWindow, Ui_ImageWindow):
 
+	image = None
+
 	def __init__(self):
 		super(ImageWindow, self).__init__()
 		self.setupUi(self)
-		self.image = None
 
 		desktop = QDesktopWidget()
 		settings = QSettings()
@@ -21,6 +22,7 @@ class ImageWindow(QMainWindow, Ui_ImageWindow):
 
 		self.deskWidth.textChanged.connect(self.deskWidthChanged)
 		self.deskHeight.textChanged.connect(self.deskHeightChanged)
+		self.setDesktopFrame()
 
 	def dragEnterEvent(self, e):
 		self.label.setText(e.mimeData().text())
@@ -49,18 +51,22 @@ class ImageWindow(QMainWindow, Ui_ImageWindow):
 			self.label.height(),
 			QtCore.Qt.KeepAspectRatio)
 		assert(image.isNull() == False)
-		pixmap = QPixmap.fromImage(image)
-		assert(pixmap.isNull() == False)
-		self.label.setPixmap(pixmap)
-		self.label.setMinimumSize(1, 1)
+		self.label.setImage(image)
 
 	def deskWidthChanged(self):
 		print("desk width changed")
+		self.setDesktopFrame()
 
 	def deskHeightChanged(self):
 		print("desk height changed")
+		self.setDesktopFrame()
 
 	def closeEvent(self, e):
 		settings = QSettings()
 		settings.setValue("desktopWidth", self.deskWidth.text())
 		settings.setValue("desktopHeight", self.deskHeight.text())
+
+	def setDesktopFrame(self):
+		self.label.setDesktop(
+			int(self.deskWidth.text()),
+			int(self.deskHeight.text()))
