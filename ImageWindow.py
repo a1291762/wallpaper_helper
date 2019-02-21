@@ -4,10 +4,12 @@ import sys
 from PySide.QtCore import *
 from PySide.QtGui import *
 from Ui_ImageWindow import *
+import os
 
 class ImageWindow(QMainWindow):
 
-	_image = None
+	image = None
+	ui = None
 
 	def __init__(self):
 		super().__init__()
@@ -26,8 +28,11 @@ class ImageWindow(QMainWindow):
 		self._setDesktopFrame()
 
 		self.ui.wallpaper.setSettingsKey("wallpaper");
-		print("wallpaper path "+self.ui.wallpaper.path)
 		self.ui.originals.setSettingsKey("originals");
+
+		path = self.ui.wallpaper.path
+		if (path != None):
+			self._loadFromPath(path)
 
 	def dragEnterEvent(self, e):
 		self.ui.label.setText(e.mimeData().text())
@@ -39,19 +44,19 @@ class ImageWindow(QMainWindow):
 
 	def dropEvent(self, e):
 		file = QUrl(e.mimeData().text()).toLocalFile().strip()
-		self._image = QImage(file)
-		assert(self._image.isNull() == False)
+		self.image = QImage(file)
+		assert(self.image.isNull() == False)
 		self._setImageOnLabel()
 		e.accept()
 
 	def resizeEvent(self, e):
-		if (self._image != None):
+		if (self.image != None):
 			self._setImageOnLabel()
 
 	def _setImageOnLabel(self):
-		assert(self._image != None)
-		assert(self._image.isNull() == False)
-		image = self._image.scaled(
+		assert(self.image != None)
+		assert(self.image.isNull() == False)
+		image = self.image.scaled(
 			self.ui.label.width(),
 			self.ui.label.height(),
 			QtCore.Qt.KeepAspectRatio)
@@ -68,3 +73,16 @@ class ImageWindow(QMainWindow):
 			int(self.ui.deskWidth.text()),
 			int(self.ui.deskHeight.text()))
 		self.update()
+
+	def _loadFromPath(self, path):
+		#print("wallpaper path "+path)
+		files = os.listdir(path)
+		if (len(files) == 0):
+			print("No files?!")
+			return
+
+		file = path+"/"+files[0]
+		#print("file '"+file+"'")
+		self.image = QImage(file)
+		assert(self.image.isNull() == False)
+		self._setImageOnLabel()
