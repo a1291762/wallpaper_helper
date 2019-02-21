@@ -92,3 +92,12 @@ class FramedLabel(QLabel):
 		with QPainter(self) as p:
 			p.setPen(Qt.yellow)
 			p.drawRect(self.frameRect)
+
+	def mousePressEvent(self, e):
+		print(e.pos())
+
+	def mouseMoveEvent(self, e):
+		print(e.pos())
+
+	def mouseReleaseEvent(self, e):
+		print(e.pos())
