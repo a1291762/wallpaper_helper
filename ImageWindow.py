@@ -44,24 +44,10 @@ class ImageWindow(QMainWindow):
 
 	def dropEvent(self, e):
 		file = QUrl(e.mimeData().text()).toLocalFile().strip()
-		self.image = QImage(file)
-		assert(self.image.isNull() == False)
-		self._setImageOnLabel()
-		e.accept()
-
-	def resizeEvent(self, e):
-		if (self.image != None):
-			self._setImageOnLabel()
-
-	def _setImageOnLabel(self):
-		assert(self.image != None)
-		assert(self.image.isNull() == False)
-		image = self.image.scaled(
-			self.ui.label.width(),
-			self.ui.label.height(),
-			QtCore.Qt.KeepAspectRatio)
+		image = QImage(file)
 		assert(image.isNull() == False)
 		self.ui.label.setImage(image)
+		e.accept()
 
 	def closeEvent(self, e):
 		settings = QSettings()
@@ -83,6 +69,6 @@ class ImageWindow(QMainWindow):
 
 		file = path+"/"+files[0]
 		#print("file '"+file+"'")
-		self.image = QImage(file)
-		assert(self.image.isNull() == False)
-		self._setImageOnLabel()
+		image = QImage(file)
+		assert(image.isNull() == False)
+		self.ui.label.setImage(image)

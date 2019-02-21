@@ -18,6 +18,7 @@ class FramedLabel(QLabel):
 	desktopWidth = 1
 	desktopHeight = 1
 	image = None
+	scaledImage = None
 	frameRect = None
 
 	def __init__(self, text: str):
@@ -30,36 +31,58 @@ class FramedLabel(QLabel):
 
 	def setImage(self, image: QImage):
 		self.image = image
-		pixmap = QPixmap.fromImage(image)
-		assert(pixmap.isNull() == False)
-		self.setPixmap(pixmap)
-		self._setFrameRect()
+		self._setPixmapFromImage()
+
+	def _setPixmapFromImage(self):
+		# Scale the image first
+		self.scaledImage = self.image.scaled(
+			self.width(),
+			self.height(),
+			Qt.KeepAspectRatio)
+		assert(self.scaledImage.isNull() == False)
+		# Needs to be a pixmap for display
+		scaledPixmap = QPixmap.fromImage(self.scaledImage)
+		assert(scaledPixmap.isNull() == False)
+		self.setPixmap(scaledPixmap)
+		self._calculateFrameRect()
 
 	def setDesktop(self, width: int, height: int):
 		self.desktopWidth = width
 		self.desktopHeight = height
-		self._setFrameRect()
+		self._calculateFrameRect()
 
 	def resizeEvent(self, e):
-		if (self.image != None):
-			self._setFrameRect()
+		if (self.image == None): return
+		self._setPixmapFromImage()
 
-	def _setFrameRect(self):
+	def _calculateFrameRect(self):
 		self.frameRect = None
 		if (self.image == None):
 			return
 
-		x = 0
-		y = 0
-		width = self.image.height() / self.desktopHeight * self.desktopWidth
-		if (width > self.image.width()):
-			width = self.image.width()
-		height = self.image.width() / self.desktopWidth * self.desktopHeight
-		if (height > self.image.height()):
-			height = self.image.height()
-		x = self.width() / 2 - (width / 2)
-		y = self.height() / 2 - (height / 2)
+		#print("scaled "+str(self.scaledImage.rect()))
+		#print("label "+str(self.rect()))
+		width = self.scaledImage.width()
+		height = self.scaledImage.height()
+		if (self.image.width() != self.desktopWidth or self.image.height() != self.desktopHeight):
+			# The image is too wide or high... frame needs to be smaller
+			if ((width > height) == (self.desktopWidth > self.desktopHeight)):
+				#print("too tall")
+				height = round(width / float(self.desktopWidth) * self.desktopHeight)
+			else:
+				#print("too fat")
+				width = round(height / float(self.desktopHeight) * self.desktopWidth)
+		#else:
+		#	print("just right!")
+
+		# FIXME between the width/height calculations above and these calculations here,
+		# it's extremely likely that the frame will NOT be drawn on the correct pixels
+		x = (self.width() / float(2)) - (width / float(2))
+		y = (self.height() / float(2)) - (height / float(2))
 		self.frameRect = QRect(x, y, width - 1, height - 1)
+
+		#print("frame "+str(self.frameRect))
+		#print("")
 
 	def paintEvent(self, e):
 		super().paintEvent(e) # text or pixmap
