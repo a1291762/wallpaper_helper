@@ -8,5 +8,6 @@
     "python.linting.pylintArgs": [
         "--extension-pkg-whitelist=PySide"
     ],
-    "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true,
+    "editor.insertSpaces": false
 }
