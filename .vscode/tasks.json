@@ -1,0 +1,19 @@
+{
+    // This is so I can run the app with Ctrl + Shift + B
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "compile and run wallpaper",
+            "type": "shell",
+            "command": "./build && ./wallpaper",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
+        }
+    ]
+}

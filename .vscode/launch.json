@@ -1,0 +1,13 @@
+{
+    // This is so I can run the program in the python debugger
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: WallpaperHelper",
+            "type": "python",
+            "request": "launch",
+            "program": "wallpaper",
+            "console": "integratedTerminal"
+        }
+    ]
+}

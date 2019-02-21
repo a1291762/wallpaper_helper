@@ -1,0 +1,13 @@
+#!/usr/bin/python3
+
+import sys
+from PySide.QtGui import *
+from ImageWindow import *
+
+app = QApplication(sys.argv)
+
+window = ImageWindow()
+window.show()
+
+ret = app.exec_()
+sys.exit(ret)
