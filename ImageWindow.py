@@ -10,7 +10,7 @@ class ImageWindow(QMainWindow):
 	_image = None
 
 	def __init__(self):
-		super(ImageWindow, self).__init__()
+		super().__init__()
 		self.ui = Ui_ImageWindow()
 		self.ui.setupUi(self)
 
