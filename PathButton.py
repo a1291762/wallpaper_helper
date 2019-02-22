@@ -3,7 +3,7 @@
 import sys
 from PySide.QtCore import *
 from PySide.QtGui import *
-from os.path import basename
+import os
 
 class PathButton(QPushButton):
 	"""A button that represents a path.
@@ -29,7 +29,7 @@ class PathButton(QPushButton):
 	def _setPath(self, path):
 		self.path = path
 		if (path):
-			self.setText(basename(path))
+			self.setText(os.path.basename(path))
 			self.setStyleSheet("")
 			settings = QSettings()
 			settings.setValue(self.settingsKey, path)
