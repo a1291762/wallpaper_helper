@@ -103,7 +103,8 @@ class ImageWindow(QMainWindow):
 		switcher = {
 			Qt.Key_Right: lambda: self._selectNextImage(FORWARDS),
 			Qt.Key_Left: lambda: self._selectNextImage(BACKWARDS),
-			Qt.Key_S: self._saveImage if e.modifiers() == Qt.ControlModifier else None
+			Qt.Key_S: self._saveImage if e.modifiers() == Qt.ControlModifier else None,
+			Qt.Key_R: self._resetImage if e.modifiers() == Qt.ControlModifier else None,
 		}
 		func = switcher.get(e.key())
 		if (func):
@@ -133,27 +134,42 @@ class ImageWindow(QMainWindow):
 		file = path+"/"+files[0]
 		self._loadFile(file)
 
-	def _saveImage(self):
+	def _getPaths(self):
 		backupPath = self.ui.originals.path
-		if (not backupPath):
-			print("No backup path is set!")
-			return
 		wallpaperPath = self.ui.wallpaper.path
-		if (not wallpaperPath):
-			print("No wallpaper path is set!")
-			return
+		if (not backupPath or not wallpaperPath):
+			print("Both the wallpaper and originals paths must be set!")
+			return None, None
 		fileName = os.path.basename(self.imagePath)
 		backupPath += "/"+fileName
 		wallpaperPath += "/"+fileName
-		#print(f"backupPath {backupPath}")
-		if (os.path.isfile(backupPath)):
-			print("Original file already exists!")
-		else:
-			print("Copy to backup folder")
+		return backupPath, wallpaperPath
+
+	def _saveImage(self):
+		backupPath, wallpaperPath = self._getPaths()
+		if (not backupPath or not wallpaperPath):
+			return
+
+		if (not os.path.isfile(backupPath)):
+			#print("Original file already exists!")
+		#else:
+			#print("Copy to backup folder")
 			shutil.copyfile(self.imagePath, backupPath)
 
-		print("Save image!")
+		#print("Save image!")
 		self.ui.label.saveImage(wallpaperPath)
+		if (wallpaperPath == self.imagePath):
+			# reload the changed image
+			self._loadFile(wallpaperPath)
+
+	def _resetImage(self):
+		backupPath, wallpaperPath = self._getPaths()
+		if (not backupPath or not wallpaperPath):
+			return
+
+		if (os.path.isfile(backupPath)):
+			shutil.move(backupPath, wallpaperPath)
+
 		if (wallpaperPath == self.imagePath):
 			# reload the changed image
 			self._loadFile(wallpaperPath)
