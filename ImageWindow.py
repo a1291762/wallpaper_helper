@@ -93,6 +93,10 @@ class ImageWindow(QMainWindow):
 		image = QImage(file)
 		assert(image.isNull() == False)
 		self.ui.label.setImage(image)
+		# Indicate if there is an original file
+		backupPath, wallpaperPath = self._getPaths()
+		if (os.path.isfile(backupPath)):
+			file += "*"
 		self.setWindowTitle(file)
 
 	def eventFilter(self, object, e):
