@@ -5,6 +5,7 @@ from PySide.QtCore import *
 from PySide.QtGui import *
 from Ui_ImageWindow import *
 import os
+import shutil
 
 FORWARDS = False
 BACKWARDS = True
@@ -100,7 +101,8 @@ class ImageWindow(QMainWindow):
 
 		switcher = {
 			Qt.Key_Right: lambda: self._selectNextImage(FORWARDS),
-			Qt.Key_Left: lambda: self._selectNextImage(BACKWARDS)
+			Qt.Key_Left: lambda: self._selectNextImage(BACKWARDS),
+			Qt.Key_S: self._saveImage if e.modifiers() == Qt.ControlModifier else None
 		}
 		func = switcher.get(e.key())
 		if (func):
@@ -129,3 +131,19 @@ class ImageWindow(QMainWindow):
 		#print("load first file")
 		file = path+"/"+files[0]
 		self._loadFile(file)
+
+	def _saveImage(self):
+		backupPath = self.ui.originals.path
+		if (not backupPath):
+			print("No backup path is set!")
+			return
+		fileName = os.path.basename(self.imagePath)
+		backupPath = backupPath+"/"+fileName
+		#print(f"backupPath {backupPath}")
+		if (os.path.isfile(backupPath)):
+			print("Original file already exists!")
+		else:
+			print("Copy to backup folder")
+			shutil.copyfile(self.imagePath, backupPath)
+
+		print("Save image!")
