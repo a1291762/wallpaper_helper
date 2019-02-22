@@ -21,7 +21,6 @@ class FramedLabel(QLabel):
 	desktopImage = None
 	clipRect = None
 	mousePos = None
-	padding = 0
 
 	def __init__(self, text: str):
 		super().__init__(text)
@@ -45,7 +44,6 @@ class FramedLabel(QLabel):
 			self.desktopImage = self.clipRect = None
 			return
 
-		self.padding = 0
 		self.desktopImage = self.originalImage.scaled(
 			self.desktopWidth,
 			self.desktopHeight,
@@ -105,11 +103,6 @@ class FramedLabel(QLabel):
 		#print(f"The scaled rect is {rect}")
 		x += offset_x
 		y += offset_y
-		if (self.padding):
-			x += self.padding
-			y += self.padding
-			width -= self.padding * 2
-			height -= self.padding * 2
 		rect = QRectF(x, y, width, height)
 		#print(f"The frame rect is {rect}")
 		return rect
@@ -162,7 +155,19 @@ class FramedLabel(QLabel):
 		clipped.save(fileName)
 
 	def addPadding(self, amount):
-		self.padding += amount
-		if (self.padding < 0):
-			self.padding = 0
+		x = self.clipRect.x()
+		y = self.clipRect.y()
+		width = self.clipRect.width() + amount
+		height = self.clipRect.height() + amount
+		# don't do this!
+		if (width < 1):
+			width = 1
+		if (height < 1):
+			height = 1
+		# don't go too big
+		if (x + width > self.desktopWidth):
+			width = self.desktopWidth - x
+		if (y + height > self.desktopHeight):
+			height = self.desktopHeight - y
+		self.clipRect = QRect(x, y, width, height)
 		self.update()

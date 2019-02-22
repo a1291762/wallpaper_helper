@@ -105,9 +105,9 @@ class ImageWindow(QMainWindow):
 			Qt.Key_Left: lambda: self._selectNextImage(BACKWARDS),
 			Qt.Key_S: self._saveImage if e.modifiers() == Qt.ControlModifier else None,
 			Qt.Key_R: self._resetImage if e.modifiers() == Qt.ControlModifier else None,
-			Qt.Key_Minus: lambda: self.ui.label.addPadding(1),
-			Qt.Key_Plus: lambda: self.ui.label.addPadding(-1),
-			Qt.Key_Equal: lambda: self.ui.label.addPadding(-1),
+			Qt.Key_Minus: lambda: self.ui.label.addPadding(-1),
+			Qt.Key_Plus: lambda: self.ui.label.addPadding(1),
+			Qt.Key_Equal: lambda: self.ui.label.addPadding(1),
 		}
 		func = switcher.get(e.key())
 		if (func):
