@@ -191,3 +191,11 @@ class FramedLabel(QLabel):
 			rect = rect.toRect() # can't use rectF with QImage
 			self.preview = self.originalImage.copy(rect)
 			self._setPixmapFromImage()
+
+	def toggleOriginal(self, original):
+		if (self.preview):
+			self.preview = None
+			self._setPixmapFromImage()
+		else:
+			self.preview = QImage(original)
+			self._setPixmapFromImage()
