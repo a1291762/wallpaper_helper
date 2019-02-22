@@ -73,25 +73,27 @@ class FramedLabel(QLabel):
 		if (self.originalImage == None):
 			return
 
-		frameRect = self._calculateFrameRect()
+		frameRect = self._calculateFrameRect(self.scaledImage.size(), self.size())
+		# drawRect wants the size to be one pixel less?
+		frameRect.adjust(0, 0, -1, -1)
 		with QPainter(self) as p:
 			p.setPen(Qt.yellow)
 			p.drawRect(frameRect)
 
-	def _calculateFrameRect(self):
+	def _calculateFrameRect(self, imageSize, selfSize):
 		"""self.clipRect needs to be scaled down to fit the display size"""
 
-		if (self.scaledImage.width() < self.width()):
+		if (imageSize.width() < selfSize.width()):
 			offset_y = 0
-			offset_x = (self.width() - self.scaledImage.width()) / 2.0
+			offset_x = (selfSize.width() - imageSize.width()) / 2.0
 		else:
 			offset_x = 0
-			offset_y = (self.height() - self.scaledImage.height()) / 2.0
+			offset_y = (selfSize.height() - imageSize.height()) / 2.0
 		#offset = QPoint(offset_x, offset_y)
 		#print(f"The offset is {offset}")
 
 		#print(f"The clipRect is {self.clipRect}")
-		ratio = self.scaledImage.width() / float(self.desktopImage.width())
+		ratio = imageSize.width() / float(self.desktopImage.width())
 		#print(f"ratio {ratio}")
 		x = self.clipRect.x() * ratio
 		y = self.clipRect.y() * ratio
@@ -101,9 +103,6 @@ class FramedLabel(QLabel):
 		#print(f"The scaled rect is {rect}")
 		x += offset_x
 		y += offset_y
-		# drawRect wants the size to be one pixel less?
-		width -= 1
-		height -= 1
 		rect = QRectF(x, y, width, height)
 		#print(f"The frame rect is {rect}")
 		return rect
@@ -147,3 +146,10 @@ class FramedLabel(QLabel):
 			return
 		#print(e.pos())
 		self.mousePos = None
+
+	def saveImage(self, fileName):
+		origSize = self.originalImage.size()
+		rect = self._calculateFrameRect(origSize, origSize)
+		rect = rect.toRect() # can't use rectF with QImage
+		clipped = self.originalImage.copy(rect)
+		clipped.save(fileName)

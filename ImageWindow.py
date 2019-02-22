@@ -138,8 +138,13 @@ class ImageWindow(QMainWindow):
 		if (not backupPath):
 			print("No backup path is set!")
 			return
+		wallpaperPath = self.ui.wallpaper.path
+		if (not wallpaperPath):
+			print("No wallpaper path is set!")
+			return
 		fileName = os.path.basename(self.imagePath)
-		backupPath = backupPath+"/"+fileName
+		backupPath += "/"+fileName
+		wallpaperPath += "/"+fileName
 		#print(f"backupPath {backupPath}")
 		if (os.path.isfile(backupPath)):
 			print("Original file already exists!")
@@ -148,3 +153,4 @@ class ImageWindow(QMainWindow):
 			shutil.copyfile(self.imagePath, backupPath)
 
 		print("Save image!")
+		self.ui.label.saveImage(wallpaperPath)
