@@ -93,6 +93,7 @@ class ImageWindow(QMainWindow):
 		image = QImage(file)
 		assert(image.isNull() == False)
 		self.ui.label.setImage(image)
+		self.setWindowTitle(file)
 
 	def eventFilter(self, object, e):
 		# I only want the key press events
