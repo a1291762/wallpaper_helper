@@ -40,8 +40,8 @@ class ImageWindow(QMainWindow):
 		self.ui.wallpaper.setSettingsKey("wallpaper");
 		self.ui.originals.setSettingsKey("originals");
 
-		imagePath = settings.value("image")
-		if (imagePath):
+		file = settings.value("image")
+		if (file):
 			# load previous image
 			self._loadFile(file)
 		else:
@@ -86,7 +86,9 @@ class ImageWindow(QMainWindow):
 		self._loadFile(file)
 
 	def _loadFile(self, file):
-		self.imagePath = file
+		self.imagePath = file # for forwards/backwards moving
+		settings = QSettings()
+		settings.setValue("image", file) # for close/reopen
 		image = QImage(file)
 		assert(image.isNull() == False)
 		self.ui.label.setImage(image)
