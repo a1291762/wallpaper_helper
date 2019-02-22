@@ -155,19 +155,23 @@ class FramedLabel(QLabel):
 		clipped.save(fileName)
 
 	def addPadding(self, amount):
+		if (self.desktopWidth > self.desktopHeight):
+			height = self.clipRect.height() + amount
+			width = height / float(self.desktopHeight) * self.desktopWidth
+		else:
+			width = self.clipRect.width() + amount
+			height = width / float(self.desktopWidth) * self.desktopHeight
+		if (width < 1 or height < 1):
+			# too small!
+			return
+
 		x = self.clipRect.x()
 		y = self.clipRect.y()
-		width = self.clipRect.width() + amount
-		height = self.clipRect.height() + amount
-		# don't do this!
-		if (width < 1):
-			width = 1
-		if (height < 1):
-			height = 1
-		# don't go too big
-		if (x + width > self.desktopWidth):
-			width = self.desktopWidth - x
-		if (y + height > self.desktopHeight):
-			height = self.desktopHeight - y
-		self.clipRect = QRect(x, y, width, height)
+		if (x + width > self.desktopImage.width() or
+			y + height > self.desktopImage.height()):
+			# too big!
+			return
+
+		self.clipRect.setWidth(width)
+		self.clipRect.setHeight(height)
 		self.update()
