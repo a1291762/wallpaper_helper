@@ -20,6 +20,7 @@ class FramedLabel(QLabel):
 	originalImage = None
 	desktopImage = None
 	clipRect = None
+	mousePos = None
 
 	def __init__(self, text: str):
 		super().__init__(text)
@@ -108,10 +109,41 @@ class FramedLabel(QLabel):
 		return rect
 
 	def mousePressEvent(self, e):
-		print(e.pos())
+		if (self.scaledImage == None):
+			return
+		#print(e.pos())
+		self.mousePos = e.pos()
 
 	def mouseMoveEvent(self, e):
-		print(e.pos())
+		if (self.scaledImage == None):
+			return
+		#print(e.pos())
+		pos = self.mousePos
+		self.mousePos = e.pos()
+
+		movement = e.pos() - pos
+		#print(f"movement {movement}")
+		ratio = self.scaledImage.width() / float(self.desktopImage.width())
+		movement.setX(movement.x() / ratio)
+		movement.setY(movement.y() / ratio)
+
+		# This is where the user has moved the clip rect to...
+		topLeft = self.clipRect.topLeft() + movement
+		# Don't allow the user to drag the clip rect off of the image
+		if (topLeft.x() < 0):
+			topLeft.setX(0)
+		if (topLeft.y() < 0):
+			topLeft.setY(0)
+		if (topLeft.x() + self.clipRect.width() > self.desktopImage.width()):
+			topLeft.setX(self.desktopImage.width() - self.clipRect.width())
+		if (topLeft.y() + self.clipRect.height() > self.desktopImage.height()):
+			topLeft.setY(self.desktopImage.height() - self.clipRect.height())
+
+		self.clipRect.moveTopLeft(topLeft)
+		self.update()
 
 	def mouseReleaseEvent(self, e):
-		print(e.pos())
+		if (self.scaledImage == None):
+			return
+		#print(e.pos())
+		self.mousePos = None
