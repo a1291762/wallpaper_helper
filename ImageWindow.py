@@ -6,6 +6,9 @@ from PySide.QtGui import *
 from Ui_ImageWindow import *
 import os
 
+FORWARDS = False
+BACKWARDS = True
+
 class ImageWindow(QMainWindow):
 
 	image = None
@@ -20,6 +23,7 @@ class ImageWindow(QMainWindow):
 		self.ui.label.setFocus()
 		self.ui.label.installEventFilter(self)
 
+		# set (or load from config) the desktop size
 		desktop = QDesktopWidget()
 		settings = QSettings()
 		desktopWidth = int(settings.value("desktopWidth", desktop.width()))
@@ -27,16 +31,24 @@ class ImageWindow(QMainWindow):
 		self.ui.deskWidth.setText("%d" % desktopWidth)
 		self.ui.deskHeight.setText("%d" % desktopHeight)
 
-		self.ui.deskWidth.textChanged.connect(self._setDesktopFrame)
-		self.ui.deskHeight.textChanged.connect(self._setDesktopFrame)
-		self._setDesktopFrame()
+		# react to size changes
+		self.ui.deskWidth.textChanged.connect(lambda: self._setDesktopFrame(True))
+		self.ui.deskHeight.textChanged.connect(lambda: self._setDesktopFrame(True))
+		self._setDesktopFrame(False)
 
+		# path buttons need to read/save config
 		self.ui.wallpaper.setSettingsKey("wallpaper");
 		self.ui.originals.setSettingsKey("originals");
 
-		path = self.ui.wallpaper.path
-		if (path != None):
-			self._loadFromPath(path)
+		imagePath = settings.value("image")
+		if (imagePath):
+			# load previous image
+			self._loadFile(file)
+		else:
+			path = self.ui.wallpaper.path
+			if (path):
+				# load the first image from the path
+				self._loadFromPath(path)
 
 	def dragEnterEvent(self, e):
 		self.ui.label.setText(e.mimeData().text())
@@ -51,16 +63,16 @@ class ImageWindow(QMainWindow):
 		self._loadFile(file)
 		e.accept()
 
-	def closeEvent(self, e):
-		settings = QSettings()
-		settings.setValue("desktopWidth", self.ui.deskWidth.text())
-		settings.setValue("desktopHeight", self.ui.deskHeight.text())
-
-	def _setDesktopFrame(self):
+	def _setDesktopFrame(self, saveSettings):
+		# Used to draw the clip rect
 		self.ui.label.setDesktop(
 			int(self.ui.deskWidth.text()),
 			int(self.ui.deskHeight.text()))
-		self.update()
+
+		if (saveSettings):
+			settings = QSettings()
+			settings.setValue("desktopWidth", self.ui.deskWidth.text())
+			settings.setValue("desktopHeight", self.ui.deskHeight.text())
 
 	def _loadFromPath(self, path):
 		#print("wallpaper path "+path)
@@ -73,17 +85,20 @@ class ImageWindow(QMainWindow):
 		file = path+"/"+files[0]
 		self._loadFile(file)
 
+	def _loadFile(self, file):
+		self.imagePath = file
+		image = QImage(file)
+		assert(image.isNull() == False)
+		self.ui.label.setImage(image)
+
 	def eventFilter(self, object, e):
-		if (not isinstance(e, QKeyEvent)):
-			#print("is not a key event")
-			return False
-		#print(e.type())
+		# I only want the key press events
 		if (e.type() != QEvent.KeyPress):
 			return False
 
 		switcher = {
-			Qt.Key_Left: self._selectPreviousImage,
-			Qt.Key_Right: self._selectNextImage
+			Qt.Key_Right: lambda: self._selectNextImage(FORWARDS),
+			Qt.Key_Left: lambda: self._selectNextImage(BACKWARDS)
 		}
 		func = switcher.get(e.key())
 		if (func):
@@ -93,36 +108,22 @@ class ImageWindow(QMainWindow):
 
 		return False
 
-	def _loadFile(self, file):
-		self.imagePath = file
-		image = QImage(file)
-		assert(image.isNull() == False)
-		self.ui.label.setImage(image)
-
-	def _selectPreviousImage(self):
+	def _selectNextImage(self, backwards):
 		path = os.path.dirname(self.imagePath)
 		files = os.listdir(path)
 		files.sort()
+		# Simply by reversing the list, we can use the same logic to move backwards
+		if backwards:
+			files.reverse()
 		lastFile = None
-		for file in reversed(files):
+		for f in files:
+			file = path+"/"+f
+			#print(f"file ${file} lastFile ${lastFile} imagePath ${self.imagePath}")
 			if (lastFile == self.imagePath):
 				#print("lastFile is current file, load next file")
-				self._loadFile(path+"/"+file)
+				self._loadFile(file)
 				return
-			lastFile = path+"/"+file
+			lastFile = file
 		#print("load first file")
-		self._loadFile(path+"/"+files[-1])
-
-	def _selectNextImage(self):
-		path = os.path.dirname(self.imagePath)
-		files = os.listdir(path)
-		files.sort()
-		lastFile = None
-		for file in files:
-			if (lastFile == self.imagePath):
-				#print("lastFile is current file, load next file")
-				self._loadFile(path+"/"+file)
-				return
-			lastFile = path+"/"+file
-		#print("load first file")
-		self._loadFile(path+"/"+files[0])
+		file = path+"/"+files[0]
+		self._loadFile(file)
