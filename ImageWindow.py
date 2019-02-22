@@ -118,7 +118,7 @@ class ImageWindow(QMainWindow):
 		lastFile = None
 		for f in files:
 			file = path+"/"+f
-			#print(f"file ${file} lastFile ${lastFile} imagePath ${self.imagePath}")
+			#print(f"file {file} lastFile {lastFile} imagePath {self.imagePath}")
 			if (lastFile == self.imagePath):
 				#print("lastFile is current file, load next file")
 				self._loadFile(file)
