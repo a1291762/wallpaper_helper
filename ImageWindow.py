@@ -41,18 +41,22 @@ class ImageWindow(QMainWindow):
 		self.ui.wallpaper.setSettingsKey("wallpaper");
 		self.ui.originals.setSettingsKey("originals");
 
-		file = settings.value("image")
-		if (file):
-			# load previous image
-			self._loadFile(file)
-		else:
-			path = self.ui.wallpaper.path
-			if (path):
-				# load the first image from the path
-				self._loadFromPath(path)
+		try:
+			file = settings.value("image")
+			if (file):
+				# load previous image
+				self._loadFile(file)
+			else:
+				path = self.ui.wallpaper.path
+				if (path):
+					# load the first image from the path
+					self._loadFromPath(path)
+		except:
+			self.ui.label.setText("Drop an image onto the window")
 
 	def dragEnterEvent(self, e):
-		self.ui.label.setText(e.mimeData().text())
+		file = e.mimeData().urls()[0].toLocalFile().strip()
+		self.ui.label.setText(file)
 		e.accept()
 
 	def dragLeaveEvent(self, e):
@@ -60,8 +64,11 @@ class ImageWindow(QMainWindow):
 		e.accept()
 
 	def dropEvent(self, e):
-		file = QUrl(e.mimeData().text()).toLocalFile().strip()
-		self._loadFile(file)
+		file = e.mimeData().urls()[0].toLocalFile().strip()
+		try:
+			self._loadFile(file)
+		except:
+			None # ignore
 		e.accept()
 
 	def _setDesktopFrame(self, saveSettings):
@@ -135,12 +142,18 @@ class ImageWindow(QMainWindow):
 			#print(f"file {file} lastFile {lastFile} imagePath {self.imagePath}")
 			if (lastFile == self.imagePath):
 				#print("lastFile is current file, load next file")
-				self._loadFile(file)
-				return
+				try:
+					self._loadFile(file)
+					return
+				except:
+					None # just keep looking
 			lastFile = file
 		#print("load first file")
 		file = path+"/"+files[0]
-		self._loadFile(file)
+		try:
+			self._loadFile(file)
+		except:
+			self.ui.label.setText("Drop an image onto the window")
 
 	def _getPaths(self):
 		backupPath = self.ui.originals.path
