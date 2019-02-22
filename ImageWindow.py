@@ -154,3 +154,6 @@ class ImageWindow(QMainWindow):
 
 		print("Save image!")
 		self.ui.label.saveImage(wallpaperPath)
+		if (wallpaperPath == self.imagePath):
+			# reload the changed image
+			self._loadFile(wallpaperPath)
