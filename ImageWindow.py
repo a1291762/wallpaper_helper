@@ -108,6 +108,7 @@ class ImageWindow(QMainWindow):
 			Qt.Key_Minus: lambda: self.ui.label.addPadding(-1),
 			Qt.Key_Plus: lambda: self.ui.label.addPadding(1),
 			Qt.Key_Equal: lambda: self.ui.label.addPadding(1),
+			Qt.Key_Space: self.ui.label.togglePreview,
 		}
 		func = switcher.get(e.key())
 		if (func):

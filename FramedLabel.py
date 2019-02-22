@@ -21,17 +21,19 @@ class FramedLabel(QLabel):
 	desktopImage = None
 	clipRect = None
 	mousePos = None
+	preview = None
 
 	def __init__(self, text: str):
 		super().__init__(text)
 		self.setMinimumSize(1, 1) # allow resizing smaller
 
 	def setText(self, text):
-		self.originalImage = self.desktopImage = self.clipRect = None
+		self.preview = self.originalImage = self.desktopImage = self.clipRect = None
 		super().setText(text)
 
 	def setImage(self, image: QImage):
 		self.originalImage = image
+		self.preview = None
 		self._resetImage()
 
 	def setDesktop(self, width: int, height: int):
@@ -55,7 +57,8 @@ class FramedLabel(QLabel):
 
 	def _setPixmapFromImage(self):
 		# Needs to be a pixmap for display
-		self.scaledImage = self.originalImage.scaled(
+		image = self.originalImage if not self.preview else self.preview
+		self.scaledImage = image.scaled(
 			self.width(),
 			self.height(),
 			Qt.KeepAspectRatio) # ,Qt.SmoothTransformation)
@@ -70,7 +73,7 @@ class FramedLabel(QLabel):
 
 	def paintEvent(self, e):
 		super().paintEvent(e) # text or pixmap
-		if (self.originalImage == None):
+		if (self.originalImage == None or self.preview):
 			return
 
 		frameRect = self._calculateFrameRect(self.scaledImage.size(), self.size())
@@ -108,13 +111,13 @@ class FramedLabel(QLabel):
 		return rect
 
 	def mousePressEvent(self, e):
-		if (self.scaledImage == None):
+		if (self.scaledImage == None or self.preview):
 			return
 		#print(e.pos())
 		self.mousePos = e.pos()
 
 	def mouseMoveEvent(self, e):
-		if (self.scaledImage == None):
+		if (self.scaledImage == None or self.preview):
 			return
 		#print(e.pos())
 		pos = self.mousePos
@@ -142,7 +145,7 @@ class FramedLabel(QLabel):
 		self.update()
 
 	def mouseReleaseEvent(self, e):
-		if (self.scaledImage == None):
+		if (self.scaledImage == None or self.preview):
 			return
 		#print(e.pos())
 		self.mousePos = None
@@ -155,6 +158,8 @@ class FramedLabel(QLabel):
 		clipped.save(fileName)
 
 	def addPadding(self, amount):
+		if (self.preview):
+			return
 		if (self.desktopWidth > self.desktopHeight):
 			height = self.clipRect.height() + amount
 			width = height / float(self.desktopHeight) * self.desktopWidth
@@ -175,3 +180,14 @@ class FramedLabel(QLabel):
 		self.clipRect.setWidth(width)
 		self.clipRect.setHeight(height)
 		self.update()
+
+	def togglePreview(self):
+		if (self.preview):
+			self.preview = None
+			self._setPixmapFromImage()
+		else:
+			origSize = self.originalImage.size()
+			rect = self._calculateFrameRect(origSize, origSize)
+			rect = rect.toRect() # can't use rectF with QImage
+			self.preview = self.originalImage.copy(rect)
+			self._setPixmapFromImage()
