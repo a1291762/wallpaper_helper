@@ -41,18 +41,23 @@ class ImageWindow(QMainWindow):
 		self.ui.wallpaper.setSettingsKey("wallpaper");
 		self.ui.originals.setSettingsKey("originals");
 
-		try:
-			file = settings.value("image")
-			if (file):
-				# load previous image
+		file = settings.value("image")
+		self._loadInitialImage(file)
+
+	def _loadInitialImage(self, file):
+		if (file):
+			# load previous image
+			try:
 				self._loadFile(file)
-			else:
-				path = self.ui.wallpaper.path
-				if (path):
-					# load the first image from the path
-					self._loadFromPath(path)
-		except:
-			self.ui.label.setText("Drop an image onto the window")
+				print("Loaded previous image")
+				return
+			except:
+				None
+		path = self.ui.wallpaper.path
+		if (path):
+			# load the first image from the path
+			self._selectNextImage(FORWARDS)
+			print("Loaded path image?")
 
 	def dragEnterEvent(self, e):
 		file = e.mimeData().urls()[0].toLocalFile().strip()
@@ -84,8 +89,7 @@ class ImageWindow(QMainWindow):
 
 	def _loadFromPath(self, path):
 		#print("wallpaper path "+path)
-		files = os.listdir(path)
-		files.sort()
+		files = self._getImages(path)
 		if (len(files) == 0):
 			print("No files?!")
 			return
@@ -116,11 +120,11 @@ class ImageWindow(QMainWindow):
 			Qt.Key_Left: lambda: self._selectNextImage(BACKWARDS),
 			Qt.Key_S: self._saveImage if e.modifiers() == Qt.ControlModifier else None,
 			Qt.Key_R: self._resetImage if e.modifiers() == Qt.ControlModifier else None,
-			Qt.Key_Minus: lambda: self.ui.label.addPadding(-1),
-			Qt.Key_Plus: lambda: self.ui.label.addPadding(1),
-			Qt.Key_Equal: lambda: self.ui.label.addPadding(1),
-			Qt.Key_Space: self.ui.label.togglePreview,
-			Qt.Key_O: lambda: self.ui.label.toggleOriginal(self.ui.originals.path+"/"+os.path.basename(self.imagePath)),
+			Qt.Key_Minus: lambda: self._addPadding(-1),
+			Qt.Key_Plus: lambda: self._addPadding(1),
+			Qt.Key_Equal: lambda: self._addPadding(1),
+			Qt.Key_Space: self._togglePreview,
+			Qt.Key_O: self._toggleOriginal,
 		}
 		func = switcher.get(e.key())
 		if (func):
@@ -132,8 +136,10 @@ class ImageWindow(QMainWindow):
 
 	def _selectNextImage(self, backwards):
 		path = os.path.dirname(self.imagePath)
-		files = os.listdir(path)
-		files.sort()
+		files = self._getImages(path)
+		if (len(files) == 0):
+			print("No files?!")
+			return
 		# Simply by reversing the list, we can use the same logic to move backwards
 		if backwards:
 			files.reverse()
@@ -155,6 +161,20 @@ class ImageWindow(QMainWindow):
 			self._loadFile(file)
 		except:
 			self.ui.label.setText("Drop an image onto the window")
+
+	def _getImages(self, path):
+		allFiles = os.listdir(path)
+		allFiles.sort()
+		files = []
+		for f in allFiles:
+			# skip hidden (dot) files
+			if (f[0] == "."): continue
+			for fmt in QImageReader.supportedImageFormats():
+				#print("Does file "+f+" match format "+fmt+"")
+				if (f.endswith("."+str(fmt))):
+					files.append(f)
+					break
+		return files
 
 	def _getPaths(self):
 		backupPath = self.ui.originals.path
@@ -195,3 +215,13 @@ class ImageWindow(QMainWindow):
 		if (wallpaperPath == self.imagePath):
 			# reload the changed image
 			self._loadFile(wallpaperPath)
+
+	def _addPadding(self, amount):
+		self.ui.label.addPadding(amount)
+
+	def _togglePreview(self):
+		self.ui.label.togglePreview()
+
+	def _toggleOriginal(self):
+		original = self.ui.originals.path+"/"+os.path.basename(self.imagePath)
+		self.ui.label.toggleOriginal(original)
