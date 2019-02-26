@@ -236,4 +236,8 @@ class ImageWindow(QMainWindow):
 	def _toggleOriginal(self):
 		backupPath, wallpaperPath = self._getPaths()
 		if (os.path.isfile(backupPath)):
-			self.ui.label.toggleOriginal(backupPath)
+			if (self.ui.label.toggleOriginal(backupPath)):
+				self.setWindowTitle(backupPath)
+			else:
+				self.setWindowTitle(self.imagePath+"*")
+

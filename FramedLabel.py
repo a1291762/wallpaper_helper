@@ -196,6 +196,8 @@ class FramedLabel(QLabel):
 		if (self.preview):
 			self.preview = None
 			self._setPixmapFromImage()
+			return False
 		else:
 			self.preview = QImage(original)
 			self._setPixmapFromImage()
+			return True
