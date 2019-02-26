@@ -218,7 +218,10 @@ class ImageWindow(QMainWindow):
 			return
 
 		if (os.path.isfile(backupPath)):
-			shutil.move(backupPath, wallpaperPath)
+			if (backupPath.endswith(".jpg")):
+				shutil.move(backupPath, wallpaperPath)
+			else:
+				QImage(backupPath).save(wallpaperPath)
 
 		if (wallpaperPath == self.imagePath):
 			# reload the changed image
