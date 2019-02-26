@@ -184,6 +184,14 @@ class ImageWindow(QMainWindow):
 			return None, None
 		fileName = os.path.basename(self.imagePath)
 		backupPath += "/"+fileName
+		if (not os.path.isfile(backupPath)):
+			#print("trying alternative backupPath values...")
+			for fmt in QImageReader.supportedImageFormats():
+				altPath = self.ui.originals.path + "/" + os.path.splitext(fileName)[0] + "." + str(fmt)
+				#print("altPath "+altPath)
+				if (os.path.isfile(altPath)):
+					backupPath = altPath
+					break
 		wallpaperPath += "/"+fileName
 		return backupPath, wallpaperPath
 
@@ -223,5 +231,6 @@ class ImageWindow(QMainWindow):
 		self.ui.label.togglePreview()
 
 	def _toggleOriginal(self):
-		original = self.ui.originals.path+"/"+os.path.basename(self.imagePath)
-		self.ui.label.toggleOriginal(original)
+		backupPath, wallpaperPath = self._getPaths()
+		if (os.path.isfile(backupPath)):
+			self.ui.label.toggleOriginal(backupPath)
