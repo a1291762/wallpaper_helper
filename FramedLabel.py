@@ -194,10 +194,14 @@ class FramedLabel(QLabel):
 
 		x = self.clipRect.x()
 		y = self.clipRect.y()
-		if x + width > self.desktopImage.width() or \
-				y + height > self.desktopImage.height():
-			# too big!
-			return
+
+		# Don't allow the border to go too big
+		if x + width > self.desktopImage.width():
+			width = self.desktopImage.width() - x
+			height = width / float(self.desktopWidth) * self.desktopHeight
+		if y + height > self.desktopImage.height():
+			height = self.desktopImage.height() - y
+			width = height / float(self.desktopHeight) * self.desktopWidth
 
 		self.clipRect.setWidth(width)
 		self.clipRect.setHeight(height)
