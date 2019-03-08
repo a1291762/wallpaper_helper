@@ -150,6 +150,28 @@ class FramedLabel(QLabel):
 		#print(e.pos())
 		self.mousePos = None
 
+	def wheelEvent(self, e):
+		if self.scaledImage == None or self.preview:
+			return
+		# mouse step = 15 degrees
+		# delta is 1/8 degree increments
+		steps = -(e.delta() / 8) / 15
+		#print(steps)
+
+		# scale steps so that 50 steps == whole image (shortest size)
+		if self.desktopWidth > self.desktopHeight:
+			steps *= (self.desktopImage.height() / 50)
+		else:
+			steps *= (self.desktopImage.width() / 50)
+
+		# make sure steps is at least 1
+		if steps > -1 and steps < 0:
+			steps = -1
+		if steps < 1 and steps > 0:
+			steps = 1
+
+		self.addPadding(steps)
+
 	def saveImage(self, fileName):
 		origSize = self.originalImage.size()
 		rect = self._calculateFrameRect(origSize, origSize)

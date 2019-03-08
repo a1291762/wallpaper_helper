@@ -30,8 +30,8 @@ There are binary packages but I found that they did not work.
 
 - Desktop size is detected (can also be manually set)
 - Crop border is shown
-- Position crop border using the mouse
-- Resize crop border using + and - keys
+- Position crop border using the mouse (or shift + arrow for pixel-precise movement)
+- Resize crop border using the scroll wheel (or + and - for pixel-precise sizing)
 - Left/Right arrow keys allow navigating all files in a folder
 - Space toggles preview of the cropped image
 - If the same image exists in the originals directory, a * is displayed in the title bar
