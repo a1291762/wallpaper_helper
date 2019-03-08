@@ -106,22 +106,45 @@ class ImageWindow(QMainWindow):
 		if e.type() != QEvent.KeyPress:
 			return False
 
-		switcher = {
-			Qt.Key_Right: lambda: self._selectNextImage(FORWARDS),
-			Qt.Key_Left: lambda: self._selectNextImage(BACKWARDS),
-			Qt.Key_S: self._saveImage if e.modifiers() == Qt.ControlModifier else None,
-			Qt.Key_R: self._resetImage if e.modifiers() == Qt.ControlModifier else None,
-			Qt.Key_Minus: lambda: self._addPadding(-1),
-			Qt.Key_Plus: lambda: self._addPadding(1),
-			Qt.Key_Equal: lambda: self._addPadding(1),
-			Qt.Key_Space: self._togglePreview,
-			Qt.Key_O: self._toggleOriginal,
-		}
-		func = switcher.get(e.key())
-		if func:
-			func()
-			e.accept()
-			return True
+		if e.modifiers() == Qt.NoModifier:
+			switcher = {
+				Qt.Key_Right: lambda: self._selectNextImage(FORWARDS),
+				Qt.Key_Left: lambda: self._selectNextImage(BACKWARDS),
+				Qt.Key_Minus: lambda: self._addPadding(-1),
+				Qt.Key_Plus: lambda: self._addPadding(1),
+				Qt.Key_Equal: lambda: self._addPadding(1),
+				Qt.Key_Space: self._togglePreview,
+				Qt.Key_O: self._toggleOriginal,
+			}
+			func = switcher.get(e.key())
+			if func:
+				func()
+				e.accept()
+				return True
+
+		if e.modifiers() == Qt.ControlModifier:
+			switcher = {
+				Qt.Key_S: self._saveImage,
+				Qt.Key_R: self._resetImage,
+			}
+			func = switcher.get(e.key())
+			if func:
+				func()
+				e.accept()
+				return True
+
+		if e.modifiers() == Qt.ShiftModifier:
+			switcher = {
+				Qt.Key_Right: lambda: self._moveFrame(1, 0),
+				Qt.Key_Left: lambda: self._moveFrame(-1, 0),
+				Qt.Key_Up: lambda: self._moveFrame(0, -1),
+				Qt.Key_Down: lambda: self._moveFrame(0, 1),
+			}
+			func = switcher.get(e.key())
+			if func:
+				func()
+				e.accept()
+				return True
 
 		return False
 
@@ -216,3 +239,6 @@ class ImageWindow(QMainWindow):
 	def _toggleOriginal(self):
 		original = self.ui.originals.path+"/"+os.path.basename(self.imagePath)
 		self.ui.label.toggleOriginal(original)
+
+	def _moveFrame(self, x, y):
+		self.ui.label.moveFrame(QPoint(x, y))
