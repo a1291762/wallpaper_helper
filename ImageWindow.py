@@ -106,47 +106,25 @@ class ImageWindow(QMainWindow):
 		if e.type() != QEvent.KeyPress:
 			return False
 
-		if e.modifiers() == Qt.NoModifier:
-			switcher = {
-				Qt.Key_Right: lambda: self._selectNextImage(FORWARDS),
-				Qt.Key_Left: lambda: self._selectNextImage(BACKWARDS),
-				Qt.Key_Minus: lambda: self._addPadding(-1),
-				Qt.Key_Plus: lambda: self._addPadding(1),
-				Qt.Key_Equal: lambda: self._addPadding(1),
-				Qt.Key_Space: self._togglePreview,
-				Qt.Key_O: self._toggleOriginal,
-			}
-			func = switcher.get(e.key())
-			if func:
-				func()
-				e.accept()
-				return True
-
 		if e.modifiers() == Qt.ControlModifier:
-			switcher = {
-				Qt.Key_S: self._saveImage,
-				Qt.Key_R: self._resetImage,
-			}
-			func = switcher.get(e.key())
-			if func:
-				func()
-				e.accept()
-				return True
+			if e.key() == Qt.Key_Right: self._saveImage()
+			if e.key() == Qt.Key_Left: self._resetImage()
+		elif e.modifiers() == Qt.ShiftModifier:
+			if e.key() == Qt.Key_Right: self._moveFrame(1, 0)
+			if e.key() == Qt.Key_Left: self._moveFrame(-1, 0)
+			if e.key() == Qt.Key_Up: self._moveFrame(0, -1)
+			if e.key() == Qt.Key_Down: self._moveFrame(0, 1)
+		else:
+			if e.key() == Qt.Key_Right: self._selectNextImage(FORWARDS)
+			if e.key() == Qt.Key_Left: self._selectNextImage(BACKWARDS)
+			if e.key() == Qt.Key_Minus: self._addPadding(-1)
+			if e.key() == Qt.Key_Plus or e.key() == Qt.Key_Equal: self._addPadding(1)
+			if e.key() == Qt.Key_Space: self._togglePreview()
+			if e.key() == Qt.Key_O: self._toggleOriginal()
 
-		if e.modifiers() == Qt.ShiftModifier:
-			switcher = {
-				Qt.Key_Right: lambda: self._moveFrame(1, 0),
-				Qt.Key_Left: lambda: self._moveFrame(-1, 0),
-				Qt.Key_Up: lambda: self._moveFrame(0, -1),
-				Qt.Key_Down: lambda: self._moveFrame(0, 1),
-			}
-			func = switcher.get(e.key())
-			if func:
-				func()
-				e.accept()
-				return True
-
-		return False
+		e.accept()
+		return True
+		#return False
 
 	def _selectNextImage(self, backwards):
 		path = os.path.dirname(self.imagePath)
