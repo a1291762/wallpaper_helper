@@ -28,7 +28,7 @@ class PathButton(QPushButton):
 
 	def _setPath(self, path):
 		self.path = path
-		if (path):
+		if path:
 			self.setText(os.path.basename(path))
 			self.setStyleSheet("")
 			settings = QSettings()
@@ -38,5 +38,5 @@ class PathButton(QPushButton):
 
 	def _pathClicked(self):
 		newPath = QFileDialog.getExistingDirectory(None, "Select the "+self.settingsKey+" folder", self.path)
-		if (len(newPath) > 0):
+		if len(newPath) > 0:
 			self._setPath(newPath)

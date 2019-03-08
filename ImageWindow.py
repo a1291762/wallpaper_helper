@@ -45,7 +45,7 @@ class ImageWindow(QMainWindow):
 		self._loadInitialImage(file)
 
 	def _loadInitialImage(self, file):
-		if (file):
+		if file:
 			# load previous image
 			try:
 				self._loadFile(file)
@@ -54,7 +54,7 @@ class ImageWindow(QMainWindow):
 			except:
 				pass # continue
 		path = self.ui.wallpaper.path
-		if (path and os.path.exists(path) and os.path.isdir(path)):
+		if path and os.path.exists(path) and os.path.isdir(path):
 			# load the first image from the path
 			self.imagePath = path + "/." # set imagePath to a file inside the wallpaper folder
 			self._selectNextImage(FORWARDS)
@@ -83,7 +83,7 @@ class ImageWindow(QMainWindow):
 			int(self.ui.deskWidth.text()),
 			int(self.ui.deskHeight.text()))
 
-		if (saveSettings):
+		if saveSettings:
 			settings = QSettings()
 			settings.setValue("desktopWidth", self.ui.deskWidth.text())
 			settings.setValue("desktopHeight", self.ui.deskHeight.text())
@@ -97,13 +97,13 @@ class ImageWindow(QMainWindow):
 		self.ui.label.setImage(image)
 		# Indicate if there is an original file
 		backupPath, wallpaperPath = self._getPaths()
-		if (os.path.isfile(backupPath)):
+		if os.path.isfile(backupPath):
 			file += "*"
 		self.setWindowTitle(file)
 
 	def eventFilter(self, object, e):
 		# I only want the key press events
-		if (e.type() != QEvent.KeyPress):
+		if e.type() != QEvent.KeyPress:
 			return False
 
 		switcher = {
@@ -118,7 +118,7 @@ class ImageWindow(QMainWindow):
 			Qt.Key_O: self._toggleOriginal,
 		}
 		func = switcher.get(e.key())
-		if (func):
+		if func:
 			func()
 			e.accept()
 			return True
@@ -128,7 +128,7 @@ class ImageWindow(QMainWindow):
 	def _selectNextImage(self, backwards):
 		path = os.path.dirname(self.imagePath)
 		files = self._getImages(path)
-		if (len(files) == 0):
+		if len(files) == 0:
 			print("No files?!")
 			return
 		# Simply by reversing the list, we can use the same logic to move backwards
@@ -138,7 +138,7 @@ class ImageWindow(QMainWindow):
 		for f in files:
 			file = path+"/"+f
 			#print(f"file {file} lastFile {lastFile} imagePath {self.imagePath}")
-			if (lastFile == self.imagePath):
+			if lastFile == self.imagePath:
 				#print("lastFile is current file, load next file")
 				try:
 					self._loadFile(file)
@@ -159,10 +159,10 @@ class ImageWindow(QMainWindow):
 		files = []
 		for f in allFiles:
 			# skip hidden (dot) files
-			if (f[0] == "."): continue
+			if f[0] == ".": continue
 			for fmt in QImageReader.supportedImageFormats():
 				#print("Does file "+f+" match format "+fmt+"")
-				if (f.endswith("."+str(fmt))):
+				if f.endswith("."+str(fmt)):
 					files.append(f)
 					break
 		return files
@@ -170,7 +170,7 @@ class ImageWindow(QMainWindow):
 	def _getPaths(self):
 		backupPath = self.ui.originals.path
 		wallpaperPath = self.ui.wallpaper.path
-		if (not backupPath or not wallpaperPath):
+		if not backupPath or not wallpaperPath:
 			print("Both the wallpaper and originals paths must be set!")
 			return None, None
 		fileName = os.path.basename(self.imagePath)
@@ -180,10 +180,10 @@ class ImageWindow(QMainWindow):
 
 	def _saveImage(self):
 		backupPath, wallpaperPath = self._getPaths()
-		if (not backupPath or not wallpaperPath):
+		if not backupPath or not wallpaperPath:
 			return
 
-		if (not os.path.isfile(backupPath)):
+		if not os.path.isfile(backupPath):
 			#print("Original file already exists!")
 		#else:
 			#print("Copy to backup folder")
@@ -191,19 +191,19 @@ class ImageWindow(QMainWindow):
 
 		#print("Save image!")
 		self.ui.label.saveImage(wallpaperPath)
-		if (wallpaperPath == self.imagePath):
+		if wallpaperPath == self.imagePath:
 			# reload the changed image
 			self._loadFile(wallpaperPath)
 
 	def _resetImage(self):
 		backupPath, wallpaperPath = self._getPaths()
-		if (not backupPath or not wallpaperPath):
+		if not backupPath or not wallpaperPath:
 			return
 
-		if (os.path.isfile(backupPath)):
+		if os.path.isfile(backupPath):
 			shutil.move(backupPath, wallpaperPath)
 
-		if (wallpaperPath == self.imagePath):
+		if wallpaperPath == self.imagePath:
 			# reload the changed image
 			self._loadFile(wallpaperPath)
 
