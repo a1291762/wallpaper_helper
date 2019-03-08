@@ -52,7 +52,7 @@ class ImageWindow(QMainWindow):
 				print("Loaded previous image")
 				return
 			except:
-				None
+				pass # continue
 		path = self.ui.wallpaper.path
 		if (path):
 			# load the first image from the path
@@ -73,7 +73,7 @@ class ImageWindow(QMainWindow):
 		try:
 			self._loadFile(file)
 		except:
-			None # ignore
+			pass # ignore
 		e.accept()
 
 	def _setDesktopFrame(self, saveSettings):
@@ -153,7 +153,7 @@ class ImageWindow(QMainWindow):
 					self._loadFile(file)
 					return
 				except:
-					None # just keep looking
+					pass # just keep looking
 			lastFile = file
 		#print("load first file")
 		file = path+"/"+files[0]
