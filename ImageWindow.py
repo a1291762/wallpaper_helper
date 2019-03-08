@@ -54,8 +54,9 @@ class ImageWindow(QMainWindow):
 			except:
 				pass # continue
 		path = self.ui.wallpaper.path
-		if (path):
+		if (path and os.path.exists(path) and os.path.isdir(path)):
 			# load the first image from the path
+			self.imagePath = path + "/." # set imagePath to a file inside the wallpaper folder
 			self._selectNextImage(FORWARDS)
 			print("Loaded path image?")
 
@@ -86,16 +87,6 @@ class ImageWindow(QMainWindow):
 			settings = QSettings()
 			settings.setValue("desktopWidth", self.ui.deskWidth.text())
 			settings.setValue("desktopHeight", self.ui.deskHeight.text())
-
-	def _loadFromPath(self, path):
-		#print("wallpaper path "+path)
-		files = self._getImages(path)
-		if (len(files) == 0):
-			print("No files?!")
-			return
-
-		file = path+"/"+files[0]
-		self._loadFile(file)
 
 	def _loadFile(self, file):
 		self.imagePath = file # for forwards/backwards moving
