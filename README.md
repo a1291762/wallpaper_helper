@@ -36,6 +36,7 @@ There are binary packages but I found that they did not work.
 - Space toggles preview of the cropped image
 - If the same image exists in the originals directory, a * is displayed in the title bar
 - Press O to toggle the original image
+- Original can be in a format other than JPG (wallpaper is always JPG)
 
 
 # TODO
@@ -46,6 +47,5 @@ There are binary packages but I found that they did not work.
 - Allow the crop border to extend past the image boundaries (fill with a solid colour)
 - Browse images from a new folder and copy to wallpaper (can already crop to wallpaper/save to originals)
 - Remove the wallpaper image, keep the original
-- Original in a format other than JPG (wallpaper is always JPG)
 - Port to pyside2 (Ubuntu has a snap, Mac users can download)
 - Packaging (installable package/app)

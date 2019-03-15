@@ -106,25 +106,31 @@ class ImageWindow(QMainWindow):
 		if e.type() != QEvent.KeyPress:
 			return False
 
-		if e.modifiers() == Qt.ControlModifier:
-			if e.key() == Qt.Key_Right: self._saveImage()
-			if e.key() == Qt.Key_Left: self._resetImage()
-		elif e.modifiers() == Qt.ShiftModifier:
+		handled = True
+		modifiers = e.modifiers()
+		if modifiers & Qt.ControlModifier:
+			if e.key() == Qt.Key_S: self._saveImage()
+			elif e.key() == Qt.Key_R: self._resetImage()
+			else: handled = False
+		elif modifiers & Qt.ShiftModifier:
 			if e.key() == Qt.Key_Right: self._moveFrame(1, 0)
-			if e.key() == Qt.Key_Left: self._moveFrame(-1, 0)
-			if e.key() == Qt.Key_Up: self._moveFrame(0, -1)
-			if e.key() == Qt.Key_Down: self._moveFrame(0, 1)
+			elif e.key() == Qt.Key_Left: self._moveFrame(-1, 0)
+			elif e.key() == Qt.Key_Up: self._moveFrame(0, -1)
+			elif e.key() == Qt.Key_Down: self._moveFrame(0, 1)
+			else: handled = False
 		else:
 			if e.key() == Qt.Key_Right: self._selectNextImage(FORWARDS)
-			if e.key() == Qt.Key_Left: self._selectNextImage(BACKWARDS)
-			if e.key() == Qt.Key_Minus: self._addPadding(-1)
-			if e.key() == Qt.Key_Plus or e.key() == Qt.Key_Equal: self._addPadding(1)
-			if e.key() == Qt.Key_Space: self._togglePreview()
-			if e.key() == Qt.Key_O: self._toggleOriginal()
+			elif e.key() == Qt.Key_Left: self._selectNextImage(BACKWARDS)
+			elif e.key() == Qt.Key_Minus: self._addPadding(-1)
+			elif e.key() == Qt.Key_Plus or e.key() == Qt.Key_Equal: self._addPadding(1)
+			elif e.key() == Qt.Key_Space: self._togglePreview()
+			elif e.key() == Qt.Key_O: self._toggleOriginal()
+			else: handled = False
 
-		e.accept()
-		return True
-		#return False
+		if handled:
+			e.accept()
+			return True
+		return False
 
 	def _selectNextImage(self, backwards):
 		path = os.path.dirname(self.imagePath)
