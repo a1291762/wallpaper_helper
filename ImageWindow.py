@@ -6,6 +6,7 @@ from PySide.QtGui import *
 from Ui_ImageWindow import *
 import os
 import shutil
+import filecmp
 
 FORWARDS = False
 BACKWARDS = True
@@ -110,7 +111,7 @@ class ImageWindow(QMainWindow):
 
 		# Indicate if the original file is different to the wallpaper file
 		backupPath, wallpaperPath = self._getPaths()
-		if os.path.isfile(backupPath) and QImage(backupPath) != image:
+		if os.path.isfile(backupPath) and not filecmp.cmp(file, backupPath):
 			file += "*"
 		self.setWindowTitle(file)
 
