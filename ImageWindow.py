@@ -279,5 +279,12 @@ class ImageWindow(QMainWindow):
 			self.viewOnlyUnusedOriginals = True
 
 	def _removeImage(self):
+		backupPath, wallpaperPath = self._getPaths()
+		if not backupPath or not wallpaperPath:
+			return
+
+		# If original doesn't exist, create it
+		if not os.path.isfile(backupPath):
+			shutil.movefile(self.imagePath, backupPath)
+
 		os.remove(self.imagePath)
-		self._selectNextImage(FORWARDS)
