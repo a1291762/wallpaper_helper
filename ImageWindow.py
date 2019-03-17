@@ -141,6 +141,7 @@ class ImageWindow(QMainWindow):
 			elif key == Qt.Key_Equal:		self._addPadding(1)
 			elif key == Qt.Key_O:			self._toggleOriginal()				# O = toggle original
 			elif key == Qt.Key_Space:		self._togglePreview()				# Space = toggle preview
+			elif key == Qt.Key_Backspace:	self._removeImage()					# Do not use image
 			else: handled = False
 
 		if handled:
@@ -193,13 +194,15 @@ class ImageWindow(QMainWindow):
 					break
 		return files
 
-	def _getPaths(self):
+	def _getPaths(self, imagePath = None):
+		if imagePath == None:
+			imagePath = self.imagePath
 		backupPath = self.ui.originals.path
 		wallpaperPath = self.ui.wallpaper.path
 		if not backupPath or not wallpaperPath:
 			print("Both the wallpaper and originals paths must be set!")
 			return None, None
-		fileName = os.path.basename(self.imagePath)
+		fileName = os.path.basename(imagePath)
 		backupPath += "/"+fileName
 		if not os.path.isfile(backupPath):
 			#print("trying alternative backupPath values...")
@@ -272,3 +275,6 @@ class ImageWindow(QMainWindow):
 		else:
 			self.viewOnlyUnusedOriginals = True
 
+	def _removeImage(self):
+		os.remove(self.imagePath)
+		self._selectNextImage(FORWARDS)
