@@ -14,6 +14,7 @@ class ImageWindow(QMainWindow):
 
 	image = None
 	ui = None
+	viewOnlyUnusedOriginals = False
 
 	def __init__(self):
 		super().__init__()
@@ -91,15 +92,25 @@ class ImageWindow(QMainWindow):
 			settings.setValue("desktopHeight", self.ui.deskHeight.text())
 
 	def _loadFile(self, file):
+		if self.viewOnlyUnusedOriginals:
+			backupPath, wallpaperPath = self._getPaths(file)
+			if backupPath == file and not os.path.isfile(wallpaperPath):
+				pass # This is an unused original
+			else:
+				raise("Not an unused original")
+
+		# make sure the image is valid
 		image = QImage(file)
 		assert(image.isNull() == False)
+
 		self.imagePath = file # for forwards/backwards moving
 		settings = QSettings()
 		settings.setValue("image", file) # for close/reopen
 		self.ui.label.setImage(image)
-		# Indicate if there is an original file
+
+		# Indicate if the original file is different to the wallpaper file
 		backupPath, wallpaperPath = self._getPaths()
-		if os.path.isfile(backupPath):
+		if os.path.isfile(backupPath) and QImage(backupPath) != image:
 			file += "*"
 		self.setWindowTitle(file)
 
@@ -112,14 +123,15 @@ class ImageWindow(QMainWindow):
 		modifiers = e.modifiers()
 		key = e.key()
 		if modifiers & Qt.ControlModifier:
-			if   key == Qt.Key_S: 			self._saveImage()				# control + S = use cropped image
-			elif key == Qt.Key_R: 			self._resetImage()			# control + R = use original image
+			if   key == Qt.Key_S: 			self._useCroppedImage()				# control + S = use cropped image
+			elif key == Qt.Key_R: 			self._useOriginalImage()			# control + R = use original image
 			else: handled = False
 		elif modifiers & Qt.ShiftModifier:
 			if   key == Qt.Key_Right:		self._moveFrame(1, 0)				# Shift + Arrow = move frame (precise)
 			elif key == Qt.Key_Left:		self._moveFrame(-1, 0)
 			elif key == Qt.Key_Up:			self._moveFrame(0, -1)
 			elif key == Qt.Key_Down:		self._moveFrame(0, 1)
+			elif key == Qt.Key_O:			self._toggleUnusedOriginals()		# Shift + O = toggle unused originals
 			else: handled = False
 		else:
 			if   key == Qt.Key_Right:		self._selectNextImage(FORWARDS)		# Right = Next
@@ -200,7 +212,7 @@ class ImageWindow(QMainWindow):
 		wallpaperPath += "/"+fileName
 		return backupPath, wallpaperPath
 
-	def _saveImage(self):
+	def _useCroppedImage(self):
 		backupPath, wallpaperPath = self._getPaths()
 		if not backupPath or not wallpaperPath:
 			return
@@ -217,16 +229,20 @@ class ImageWindow(QMainWindow):
 		if wallpaperPath == self.imagePath:
 			self._loadFile(self.imagePath)
 
-	def _resetImage(self):
+	def _useOriginalImage(self):
 		backupPath, wallpaperPath = self._getPaths()
 		if not backupPath or not wallpaperPath:
 			return
 
-		if os.path.isfile(backupPath):
-			if backupPath.endswith(".jpg"):
-				shutil.move(backupPath, wallpaperPath)
-			else:
-				QImage(backupPath).save(wallpaperPath)
+		# If original doesn't exist, create it
+		if not os.path.isfile(backupPath):
+			shutil.copyfile(self.imagePath, backupPath)
+
+		# Save uncropped image
+		if backupPath.endswith(".jpg"):
+			shutil.copy(backupPath, wallpaperPath)
+		else:
+			QImage(backupPath).save(wallpaperPath)
 
 		# If the wallpaper image is open, reload it
 		# If another path was opened, do nothing
@@ -249,3 +265,10 @@ class ImageWindow(QMainWindow):
 
 	def _moveFrame(self, x, y):
 		self.ui.label.moveFrame(QPoint(x, y))
+
+	def _toggleUnusedOriginals(self):
+		if self.viewOnlyUnusedOriginals:
+			self.viewOnlyUnusedOriginals = False
+		else:
+			self.viewOnlyUnusedOriginals = True
+
