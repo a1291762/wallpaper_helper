@@ -33,10 +33,34 @@ There are binary packages but I found that they did not work.
 - Position crop border using the mouse (or shift + arrow for pixel-precise movement)
 - Resize crop border using the scroll wheel (or + and - for pixel-precise sizing)
 - Left/Right arrow keys allow navigating all files in a folder
-- Space toggles preview of the cropped image
-- If the same image exists in the originals directory, a * is displayed in the title bar
-- Press O to toggle the original image
-- Original can be in a format other than JPG (wallpaper is always JPG)
+- Space toggles cropped preview
+- If an image is modified from the original, a * is displayed in the title bar
+- Press O to toggle viewing the original image
+- Original can be in a format other than .jpg (wallpaper is always .jpg)
+
+
+# Workflow 1 - crop existing set of wallpapers
+
+- Create empty folders for originals
+- Set the wallpaper and originals paths in the app
+- Drag an image from wallpaper folder onto the app
+- Review images (left/right) and choose to save cropped (Control+S) versions as required
+- Image that are not .jpg will be automatically converted (original moved to originals)
+- Choose to remove a wallpaper, keeping the original (Backspace)
+
+
+# Workflow 2 - add new images to wallpaper set
+
+- Drag an image from proposed folder onto the app
+- Review images (left/right) and choose to save original (Control+R) or cropped (Control+S) versions
+- Choose to copy to originals folder, without adding to wallpaper (Backspace)
+
+
+# Workflow 3 - review unused originals
+
+- Drag an image from originals folder onto the app
+- Toggle unused originals (Shift+O)
+- Review images (left/right) and choose to save original (Control+R) or cropped (Control+S) versions
 
 
 # TODO
