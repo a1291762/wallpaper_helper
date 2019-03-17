@@ -45,8 +45,8 @@ There are binary packages but I found that they did not work.
 - Set the wallpaper and originals paths in the app
 - Drag an image from wallpaper folder onto the app
 - Review images (left/right) and choose to save cropped (Control+S) versions as required
-- Image that are not .jpg will be automatically converted (original moved to originals)
-- Choose to remove a wallpaper, keeping the original (Backspace)
+- Save uncropped (Control+R) versions to convert from non-JPEG to .jpg
+- Choose to remove a wallpaper, moving the original (Backspace)
 
 
 # Workflow 2 - add new images to wallpaper set
