@@ -111,7 +111,9 @@ class ImageWindow(QMainWindow):
 
 		# Indicate if the original file is different to the wallpaper file
 		backupPath, wallpaperPath = self._getPaths()
-		if os.path.isfile(backupPath) and not filecmp.cmp(file, backupPath):
+		if file != backupPath and \
+			os.path.isfile(backupPath) and \
+				not filecmp.cmp(file, backupPath):
 			file += "*"
 		self.setWindowTitle(file)
 
