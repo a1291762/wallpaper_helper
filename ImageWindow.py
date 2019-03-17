@@ -38,9 +38,10 @@ class ImageWindow(QMainWindow):
 		self._setDesktopFrame(False)
 
 		# path buttons need to read/save config
-		self.ui.wallpaper.setSettingsKey("wallpaper");
-		self.ui.originals.setSettingsKey("originals");
+		self.ui.wallpaper.setSettingsKey("wallpaper")
+		self.ui.originals.setSettingsKey("originals")
 
+		# Load the initial image
 		file = settings.value("image")
 		self._loadInitialImage(file)
 
@@ -53,6 +54,7 @@ class ImageWindow(QMainWindow):
 				return
 			except:
 				pass # continue
+
 		path = self.ui.wallpaper.path
 		if path and os.path.exists(path) and os.path.isdir(path):
 			# load the first image from the path
@@ -89,11 +91,11 @@ class ImageWindow(QMainWindow):
 			settings.setValue("desktopHeight", self.ui.deskHeight.text())
 
 	def _loadFile(self, file):
+		image = QImage(file)
+		assert(image.isNull() == False)
 		self.imagePath = file # for forwards/backwards moving
 		settings = QSettings()
 		settings.setValue("image", file) # for close/reopen
-		image = QImage(file)
-		assert(image.isNull() == False)
 		self.ui.label.setImage(image)
 		# Indicate if there is an original file
 		backupPath, wallpaperPath = self._getPaths()
@@ -108,23 +110,25 @@ class ImageWindow(QMainWindow):
 
 		handled = True
 		modifiers = e.modifiers()
+		key = e.key()
 		if modifiers & Qt.ControlModifier:
-			if e.key() == Qt.Key_S: self._saveImage()
-			elif e.key() == Qt.Key_R: self._resetImage()
+			if   key == Qt.Key_S: 			self._saveImage()				# control + S = use cropped image
+			elif key == Qt.Key_R: 			self._resetImage()			# control + R = use original image
 			else: handled = False
 		elif modifiers & Qt.ShiftModifier:
-			if e.key() == Qt.Key_Right: self._moveFrame(1, 0)
-			elif e.key() == Qt.Key_Left: self._moveFrame(-1, 0)
-			elif e.key() == Qt.Key_Up: self._moveFrame(0, -1)
-			elif e.key() == Qt.Key_Down: self._moveFrame(0, 1)
+			if   key == Qt.Key_Right:		self._moveFrame(1, 0)				# Shift + Arrow = move frame (precise)
+			elif key == Qt.Key_Left:		self._moveFrame(-1, 0)
+			elif key == Qt.Key_Up:			self._moveFrame(0, -1)
+			elif key == Qt.Key_Down:		self._moveFrame(0, 1)
 			else: handled = False
 		else:
-			if e.key() == Qt.Key_Right: self._selectNextImage(FORWARDS)
-			elif e.key() == Qt.Key_Left: self._selectNextImage(BACKWARDS)
-			elif e.key() == Qt.Key_Minus: self._addPadding(-1)
-			elif e.key() == Qt.Key_Plus or e.key() == Qt.Key_Equal: self._addPadding(1)
-			elif e.key() == Qt.Key_Space: self._togglePreview()
-			elif e.key() == Qt.Key_O: self._toggleOriginal()
+			if   key == Qt.Key_Right:		self._selectNextImage(FORWARDS)		# Right = Next
+			elif key == Qt.Key_Left:		self._selectNextImage(BACKWARDS)	# Left = Prev
+			elif key == Qt.Key_Minus:		self._addPadding(-1)				# Plus/Minus = grow/shrink (precise)
+			elif key == Qt.Key_Plus:		self._addPadding(1)
+			elif key == Qt.Key_Equal:		self._addPadding(1)
+			elif key == Qt.Key_O:			self._toggleOriginal()				# O = toggle original
+			elif key == Qt.Key_Space:		self._togglePreview()				# Space = toggle preview
 			else: handled = False
 
 		if handled:
@@ -138,9 +142,11 @@ class ImageWindow(QMainWindow):
 		if len(files) == 0:
 			print("No files?!")
 			return
+
 		# Simply by reversing the list, we can use the same logic to move backwards
 		if backwards:
 			files.reverse()
+
 		lastFile = None
 		for f in files:
 			file = path+"/"+f
@@ -153,6 +159,7 @@ class ImageWindow(QMainWindow):
 				except:
 					pass # just keep looking
 			lastFile = file
+
 		#print("load first file")
 		file = path+"/"+files[0]
 		try:
@@ -198,17 +205,17 @@ class ImageWindow(QMainWindow):
 		if not backupPath or not wallpaperPath:
 			return
 
+		# If original doesn't exist, create it
 		if not os.path.isfile(backupPath):
-			#print("Original file already exists!")
-		#else:
-			#print("Copy to backup folder")
 			shutil.copyfile(self.imagePath, backupPath)
 
-		#print("Save image!")
+		# Save cropped image
 		self.ui.label.saveImage(wallpaperPath)
+
+		# If the wallpaper image is open, reload it
+		# If another path was opened, do nothing
 		if wallpaperPath == self.imagePath:
-			# reload the changed image
-			self._loadFile(wallpaperPath)
+			self._loadFile(self.imagePath)
 
 	def _resetImage(self):
 		backupPath, wallpaperPath = self._getPaths()
@@ -221,9 +228,10 @@ class ImageWindow(QMainWindow):
 			else:
 				QImage(backupPath).save(wallpaperPath)
 
+		# If the wallpaper image is open, reload it
+		# If another path was opened, do nothing
 		if wallpaperPath == self.imagePath:
-			# reload the changed image
-			self._loadFile(wallpaperPath)
+			self._loadFile(self.imagePath)
 
 	def _addPadding(self, amount):
 		self.ui.label.addPadding(amount)
