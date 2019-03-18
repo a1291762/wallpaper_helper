@@ -11,6 +11,14 @@ import filecmp
 FORWARDS = False
 BACKWARDS = True
 
+def forceExt(path, ext):
+	file = os.path.basename(path)
+	path = os.path.dirname(path)
+	return path + "/" + os.path.splitext(file)[0] + "." + ext
+
+def forceJpeg(path):
+	return forceExt(path, "jpg")
+
 class ImageWindow(QMainWindow):
 
 	image = None
@@ -210,7 +218,7 @@ class ImageWindow(QMainWindow):
 		if not os.path.isfile(backupPath):
 			#print("trying alternative backupPath values...")
 			for fmt in QImageReader.supportedImageFormats():
-				altPath = self.ui.originals.path + "/" + os.path.splitext(fileName)[0] + "." + str(fmt)
+				altPath = forceExt(backupPath, str(fmt))
 				#print("altPath "+altPath)
 				if os.path.isfile(altPath):
 					backupPath = altPath
@@ -225,9 +233,12 @@ class ImageWindow(QMainWindow):
 
 		# If original doesn't exist, create it
 		if not os.path.isfile(backupPath):
-			shutil.copyfile(self.imagePath, backupPath)
+			shutil.copy(self.imagePath, backupPath)
 
 		# Save cropped image
+		if os.path.isfile(wallpaperPath):
+			os.remove(wallpaperPath)
+		wallpaperPath = forceJpeg(wallpaperPath)
 		self.ui.label.saveImage(wallpaperPath)
 
 		# If the wallpaper image is open, reload it
@@ -242,12 +253,15 @@ class ImageWindow(QMainWindow):
 
 		# If original doesn't exist, create it
 		if not os.path.isfile(backupPath):
-			shutil.movefile(self.imagePath, backupPath)
+			shutil.move(self.imagePath, backupPath)
 
 		# Save uncropped image
 		if backupPath.endswith(".jpg"):
-			shutil.copyfile(backupPath, wallpaperPath)
+			shutil.copy(backupPath, wallpaperPath)
 		else:
+			if os.path.isfile(wallpaperPath):
+				os.remove(wallpaperPath)
+			wallpaperPath = forceJpeg(wallpaperPath)
 			QImage(backupPath).save(wallpaperPath)
 
 		# If the wallpaper image is open, reload it
@@ -285,6 +299,6 @@ class ImageWindow(QMainWindow):
 
 		# If original doesn't exist, create it
 		if not os.path.isfile(backupPath):
-			shutil.movefile(self.imagePath, backupPath)
+			shutil.move(self.imagePath, backupPath)
 
 		os.remove(self.imagePath)
