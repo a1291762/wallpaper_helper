@@ -62,7 +62,8 @@ class ImageWindow(QMainWindow):
 				self._loadFile(file)
 				print("Loaded previous image")
 				return
-			except:
+			except Exception as e:
+				print("Failed to load initial image "+file+" "+str(e))
 				pass # continue
 
 		path = self.ui.wallpaper.path
@@ -86,7 +87,7 @@ class ImageWindow(QMainWindow):
 		try:
 			self._loadFile(file)
 		except:
-			pass # ignore
+			self.ui.label.setText("Drop an image onto the window")
 		e.accept()
 
 	def _setDesktopFrame(self, saveSettings):
@@ -111,19 +112,22 @@ class ImageWindow(QMainWindow):
 		# make sure the image is valid
 		image = QImage(file)
 		assert(image.isNull() == False)
-
+		self.ui.label.setImage(image)
 		self.imagePath = file # for forwards/backwards moving
 		settings = QSettings()
 		settings.setValue("image", file) # for close/reopen
-		self.ui.label.setImage(image)
 
-		# Indicate if the original file is different to the wallpaper file
-		backupPath, wallpaperPath = self._getPaths()
-		if file != backupPath and \
-			os.path.isfile(backupPath) and \
-				not filecmp.cmp(file, backupPath):
-			file += "*"
-		self.setWindowTitle(file)
+		title = file
+		try:
+			# Indicate if the original file is different to the wallpaper file
+			backupPath, wallpaperPath = self._getPaths()
+			if file != backupPath and \
+				os.path.isfile(backupPath) and \
+					not filecmp.cmp(file, backupPath):
+				title += "*"
+		except Exception as e:
+			print("Error checking if backup and wallpaper differ?! "+str(e))
+		self.setWindowTitle(title)
 
 	def eventFilter(self, object, e):
 		# I only want the key press events
@@ -236,6 +240,7 @@ class ImageWindow(QMainWindow):
 			shutil.copy(self.imagePath, backupPath)
 
 		# Save cropped image
+		origWallpaperPath = wallpaperPath
 		if os.path.isfile(wallpaperPath):
 			os.remove(wallpaperPath)
 		wallpaperPath = forceJpeg(wallpaperPath)
@@ -243,7 +248,8 @@ class ImageWindow(QMainWindow):
 
 		# If the wallpaper image is open, reload it
 		# If another path was opened, do nothing
-		if wallpaperPath == self.imagePath:
+		if wallpaperPath == self.imagePath or \
+				origWallpaperPath == self.imagePath:
 			self._loadFile(self.imagePath)
 
 	def _useOriginalImage(self):
@@ -256,6 +262,7 @@ class ImageWindow(QMainWindow):
 			shutil.move(self.imagePath, backupPath)
 
 		# Save uncropped image
+		origWallpaperPath = wallpaperPath
 		if backupPath.endswith(".jpg"):
 			shutil.copy(backupPath, wallpaperPath)
 		else:
@@ -266,7 +273,8 @@ class ImageWindow(QMainWindow):
 
 		# If the wallpaper image is open, reload it
 		# If another path was opened, do nothing
-		if wallpaperPath == self.imagePath:
+		if wallpaperPath == self.imagePath or \
+				origWallpaperPath == self.imagePath:
 			self._loadFile(self.imagePath)
 
 	def _addPadding(self, amount):
