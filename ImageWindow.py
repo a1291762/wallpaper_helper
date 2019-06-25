@@ -51,6 +51,10 @@ class ImageWindow(QMainWindow):
 		self.ui.wallpaper.setSettingsKey("wallpaper")
 		self.ui.originals.setSettingsKey("originals")
 
+		# help button
+		self.ui.helpBtn.toggled.connect(self._toggleHelp)
+		self._toggleHelp(False)
+
 		# Load the initial image
 		file = settings.value("image")
 		self._loadInitialImage(file)
@@ -310,3 +314,9 @@ class ImageWindow(QMainWindow):
 			shutil.move(self.imagePath, backupPath)
 
 		os.remove(self.imagePath)
+
+	def _toggleHelp(self, visible):
+		if visible:
+			self.ui.help.show()
+		else:
+			self.ui.help.hide()
