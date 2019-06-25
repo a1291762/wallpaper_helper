@@ -263,7 +263,10 @@ class ImageWindow(QMainWindow):
 
 		# If original doesn't exist, create it
 		if not os.path.isfile(backupPath):
-			shutil.move(self.imagePath, backupPath)
+			if wallpaperPath == self.imagePath:
+				shutil.move(self.imagePath, backupPath)
+			else:
+				shutil.copy(self.imagePath, backupPath)
 
 		# Save uncropped image
 		origWallpaperPath = wallpaperPath
