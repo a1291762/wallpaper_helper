@@ -65,11 +65,8 @@ There are binary packages but I found that they did not work.
 
 # TODO
 
-- Keep all originals in originals, copy/link to wallpaper
 - One original image -> two wallpaper images
 - Rotate before crop
 - Allow the crop border to extend past the image boundaries (fill with a solid colour)
-- Browse images from a new folder and copy to wallpaper (can already crop to wallpaper/save to originals)
-- Remove the wallpaper image, keep the original
 - Port to pyside2 (Ubuntu has a snap, Mac users can download)
 - Packaging (installable package/app)
