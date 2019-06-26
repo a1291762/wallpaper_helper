@@ -76,6 +76,9 @@
         </item>
         <item>
          <widget class="PathButton" name="wallpaper">
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
           <property name="text">
            <string>None</string>
           </property>
@@ -94,6 +97,9 @@
         </item>
         <item>
          <widget class="PathButton" name="originals">
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
           <property name="text">
            <string>None</string>
           </property>
@@ -105,6 +111,9 @@
        <layout class="QHBoxLayout" name="horizontalLayout_10">
         <item>
          <widget class="PathButton" name="helpBtn">
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
           <property name="text">
            <string>Help</string>
           </property>
