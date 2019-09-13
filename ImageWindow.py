@@ -108,10 +108,11 @@ class ImageWindow(QMainWindow):
 	def _loadFile(self, file):
 		if self.viewOnlyUnusedOriginals:
 			backupPath, wallpaperPath = self._getPaths(file)
+			wallpaperPath = forceJpeg(wallpaperPath)
 			if backupPath == file and not os.path.isfile(wallpaperPath):
 				pass # This is an unused original
 			else:
-				raise("Not an unused original")
+				raise Exception("Not an unused original")
 
 		# make sure the image is valid
 		image = QImage(file)
@@ -179,25 +180,60 @@ class ImageWindow(QMainWindow):
 		if backwards:
 			files.reverse()
 
-		lastFile = None
-		for f in files:
-			file = path+"/"+f
-			#print(f"file {file} lastFile {lastFile} imagePath {self.imagePath}")
-			if lastFile == self.imagePath:
-				#print("lastFile is current file, load next file")
-				try:
-					self._loadFile(file)
-					return
-				except:
-					pass # just keep looking
-			lastFile = file
+		if self.viewOnlyUnusedOriginals:
+			if self._selectNextImage3(path, files):
+				return
+		else:
+			if self._selectNextImage2(path, files):
+				return
 
-		#print("load first file")
+		print("load first file")
 		file = path+"/"+files[0]
 		try:
 			self._loadFile(file)
-		except:
+		except Exception as e:
+			print("exception: {}".format(e))
 			self.ui.label.setText("Drop an image onto the window")
+
+
+	def _selectNextImage2(self, path, files):
+		startSearching = False
+		for f in files:
+			file = path+"/"+f
+			if file == self.imagePath:
+				startSearching = True
+			elif startSearching:
+				try:
+					self._loadFile(file)
+					return True
+				except Exception as e:
+					pass # keep looking
+
+
+	def _selectNextImage3(self, path, files):
+		startSearching = False
+		for f in files:
+			file = path+"/"+f
+			if file == self.imagePath:
+				startSearching = True
+			elif startSearching:
+				try:
+					self._loadFile(file)
+					return True
+				except Exception as e:
+					pass # keep looking
+
+		# wrap around to the start
+		for f in files:
+			file = path+"/"+f
+			if file == self.imagePath:
+				return False # got to the end
+			try:
+				self._loadFile(file)
+				return True
+			except Exception as e:
+				pass # keep looking
+
 
 	def _getImages(self, path):
 		allFiles = os.listdir(path)
