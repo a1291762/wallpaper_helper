@@ -3,6 +3,11 @@
 This is an application to assist in cropping wallpaper for display on your monitor.
 
 
+# License
+
+This source code is released under the MIT license (see LICENSE for details).
+
+
 # Dependencies
 
 ## Ubuntu
