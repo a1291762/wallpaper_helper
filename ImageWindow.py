@@ -352,7 +352,9 @@ class ImageWindow(QMainWindow):
 		if not os.path.isfile(backupPath):
 			shutil.move(self.imagePath, backupPath)
 
-		os.remove(self.imagePath)
+		# only remove the wallpaper (not an out-of-wallpaper image)
+		if self.imagePath == wallpaperPath:
+			os.remove(self.imagePath)
 
 	def _toggleHelp(self, visible):
 		if visible:
