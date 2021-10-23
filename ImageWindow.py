@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 import sys
-from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide2.QtCore import *
+from PySide2.QtGui import *
 from Ui_ImageWindow import *
 import os
 import shutil
@@ -236,15 +236,17 @@ class ImageWindow(QMainWindow):
 
 
 	def _getImages(self, path):
+		#print(f"_getImages {path}")
 		allFiles = os.listdir(path)
+		#print(f"allFiles {allFiles}")
 		allFiles.sort()
 		files = []
 		for f in allFiles:
 			# skip hidden (dot) files
 			if f[0] == ".": continue
 			for fmt in QImageReader.supportedImageFormats():
-				#print("Does file "+f+" match format "+fmt+"")
-				if f.endswith("."+str(fmt)):
+				ext = "."+bytes(fmt).decode()
+				if f.endswith(ext):
 					files.append(f)
 					break
 		return files

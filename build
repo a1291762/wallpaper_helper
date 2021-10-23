@@ -4,7 +4,7 @@ set -e
 
 for file in *.ui; do
     outfile=Ui_$(echo "$file" | sed 's/\.ui//').py
-    pyside-uic -o $outfile $file
+    pyside2-uic -o $outfile $file
 done
 
 exit 0

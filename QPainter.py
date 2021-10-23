@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
 import sys
-import PySide.QtGui
+import PySide2.QtGui
 
-class QPainter(PySide.QtGui.QPainter):
+class QPainter(PySide2.QtGui.QPainter):
 	"""Add __enter__ and __exit__ methods so that the with statement can be used.
 
 	before:
@@ -17,7 +17,7 @@ class QPainter(PySide.QtGui.QPainter):
 			# draw
 
 	You can import like this to shadow the actual QPainter class:
-		from PySide.QtGui import *
+		from PySide2.QtGui import *
 		from QPainter import *
 	"""
 
