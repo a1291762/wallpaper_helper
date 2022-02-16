@@ -73,5 +73,4 @@ There are binary packages but I found that they did not work.
 - One original image -> two wallpaper images
 - Rotate before crop
 - Allow the crop border to extend past the image boundaries (fill with a solid colour)
-- Port to pyside2 (Ubuntu has a snap, Mac users can download)
 - Packaging (installable package/app)

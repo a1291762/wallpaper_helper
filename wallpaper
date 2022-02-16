@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 
 import sys
-from PySide2.QtGui import *
+try:
+	from PySide6.QtGui import *
+except Exception:
+	try:
+		from PySide2.QtGui import *
+	except Exception:
+		from PySide.QtGui import *
 from ImageWindow import *
 
 app = QApplication(sys.argv)
@@ -11,5 +17,8 @@ app.setApplicationName("WallpaperHelper")
 window = ImageWindow()
 window.show()
 
-ret = app.exec_()
+try:
+	ret = app.exec()
+except Exception:
+	ret = app.exec_()
 sys.exit(ret)

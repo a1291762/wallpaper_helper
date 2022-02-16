@@ -1,10 +1,16 @@
 #!/bin/sh
 
+pyside=pyside6
+if [ "$1" = -p ]; then
+    pyside=$2
+    shift 2
+fi
+
 set -e
 
 for file in *.ui; do
     outfile=Ui_$(echo "$file" | sed 's/\.ui//').py
-    pyside2-uic -o $outfile $file
+    $pyside-uic -o $outfile $file
 done
 
 exit 0

@@ -1,8 +1,16 @@
 #!/usr/bin/python3
 
 import sys
-from PySide2.QtCore import *
-from PySide2.QtGui import *
+try:
+	from PySide6.QtCore import *
+	from PySide6.QtGui import *
+except Exception:
+	try:
+		from PySide2.QtCore import *
+		from PySide2.QtGui import *
+	except Exception:
+		from PySide.QtCore import *
+		from PySide.QtGui import *
 from Ui_ImageWindow import *
 import os
 import shutil
@@ -35,7 +43,10 @@ class ImageWindow(QMainWindow):
 		self.ui.label.installEventFilter(self)
 
 		# set (or load from config) the desktop size
-		desktop = QDesktopWidget()
+		try:
+			desktop = QGuiApplication.primaryScreen().size()
+		except Exception:
+			desktop = QDesktopWidget()
 		settings = QSettings()
 		desktopWidth = int(settings.value("desktopWidth", desktop.width()))
 		desktopHeight = int(settings.value("desktopHeight", desktop.height()))
