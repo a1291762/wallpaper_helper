@@ -1,3 +1,4 @@
 Ui_*.py
 __pycache__
 .vscode
+.qt_for_python
