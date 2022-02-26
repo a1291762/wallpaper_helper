@@ -152,7 +152,11 @@ class FramedLabel(QLabel):
 			return
 		# mouse step = 15 degrees
 		# delta is 1/8 degree increments
-		steps = -(e.delta() / 8) / 15
+		try:
+			delta = e.angleDelta().y()
+		except Exception:
+			delta = e.delta()
+		steps = -(delta / 8) / 15
 		#print(steps)
 
 		# scale steps so that 50 steps == whole image (shortest size)
