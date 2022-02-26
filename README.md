@@ -57,6 +57,12 @@ PySide 6/Qt 6, PySide 2/Qt 5 or PySide/Qt 4
 - Review images (left/right) and choose to save original (Control+R) or cropped (Control+S) versions
 
 
+# Workflow 4 - review [un]cropped images (eg. new monitor)
+
+- Toggle [un]cropped images (Shift+C)
+- Review images (left/right), revert to original (Control+R) then re-crop (Control+S)
+
+
 # TODO
 
 - One original image -> two wallpaper images

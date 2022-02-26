@@ -18,6 +18,11 @@ import filecmp
 
 FORWARDS = False
 BACKWARDS = True
+VIEW_ALL = object()
+VIEW_UNUSED_ORIGINALS = object()
+VIEW_CROPPED = object()
+VIEW_UNCROPPED = object()
+
 
 def forceExt(path, ext):
 	file = os.path.basename(path)
@@ -31,7 +36,7 @@ class ImageWindow(QMainWindow):
 
 	image = None
 	ui = None
-	viewOnlyUnusedOriginals = False
+	viewMode = VIEW_ALL
 
 	def __init__(self):
 		super().__init__()
@@ -116,14 +121,29 @@ class ImageWindow(QMainWindow):
 			settings.setValue("desktopWidth", self.ui.deskWidth.text())
 			settings.setValue("desktopHeight", self.ui.deskHeight.text())
 
-	def _loadFile(self, file):
-		if self.viewOnlyUnusedOriginals:
+	def _loadFile(self, file, force=False):
+		if self.viewMode != VIEW_ALL:
 			backupPath, wallpaperPath = self._getPaths(file)
 			wallpaperPath = forceJpeg(wallpaperPath)
-			if backupPath == file and not os.path.isfile(wallpaperPath):
-				pass # This is an unused original
-			else:
-				raise Exception("Not an unused original")
+			if self.viewMode == VIEW_UNUSED_ORIGINALS:
+				if backupPath == file and not os.path.isfile(wallpaperPath):
+					pass # This is an unused original
+				elif not force:
+					raise Exception("Not an unused original")
+			elif self.viewMode == VIEW_CROPPED:
+				if file == wallpaperPath and \
+						os.path.isfile(backupPath) and \
+						not filecmp.cmp(file, backupPath):
+					pass
+				elif not force:
+					raise Exception("Not a cropped image")
+			elif self.viewMode == VIEW_UNCROPPED:
+				if file == wallpaperPath and \
+						os.path.isfile(backupPath) and \
+						filecmp.cmp(file, backupPath):
+					pass
+				elif not force:
+					raise Exception("Not an uncropped image")
 
 		# make sure the image is valid
 		image = QImage(file)
@@ -163,6 +183,7 @@ class ImageWindow(QMainWindow):
 			elif key == Qt.Key_Up:			self._moveFrame(0, -1)
 			elif key == Qt.Key_Down:		self._moveFrame(0, 1)
 			elif key == Qt.Key_O:			self._toggleUnusedOriginals()		# Shift + O = toggle unused originals
+			elif key == Qt.Key_C:			self._toggleCroppedImages()			# Shift + C = toggle cropped images
 			else: handled = False
 		else:
 			if   key == Qt.Key_Right:		self._selectNextImage(FORWARDS)		# Right = Next
@@ -191,12 +212,8 @@ class ImageWindow(QMainWindow):
 		if backwards:
 			files.reverse()
 
-		if self.viewOnlyUnusedOriginals:
-			if self._selectNextImage3(path, files):
-				return
-		else:
-			if self._selectNextImage2(path, files):
-				return
+		if self._selectNextImage2(path, files):
+			return
 
 		print("load first file")
 		file = path+"/"+files[0]
@@ -208,20 +225,6 @@ class ImageWindow(QMainWindow):
 
 
 	def _selectNextImage2(self, path, files):
-		startSearching = False
-		for f in files:
-			file = path+"/"+f
-			if file == self.imagePath:
-				startSearching = True
-			elif startSearching:
-				try:
-					self._loadFile(file)
-					return True
-				except Exception as e:
-					pass # keep looking
-
-
-	def _selectNextImage3(self, path, files):
 		startSearching = False
 		for f in files:
 			file = path+"/"+f
@@ -303,7 +306,7 @@ class ImageWindow(QMainWindow):
 		# If another path was opened, do nothing
 		if wallpaperPath == self.imagePath or \
 				origWallpaperPath == self.imagePath:
-			self._loadFile(self.imagePath)
+			self._loadFile(self.imagePath, force=True)
 
 	def _useOriginalImage(self):
 		backupPath, wallpaperPath = self._getPaths()
@@ -331,7 +334,7 @@ class ImageWindow(QMainWindow):
 		# If another path was opened, do nothing
 		if wallpaperPath == self.imagePath or \
 				origWallpaperPath == self.imagePath:
-			self._loadFile(self.imagePath)
+			self._loadFile(self.imagePath, force=True)
 
 	def _addPadding(self, amount):
 		self.ui.label.addPadding(amount)
@@ -351,10 +354,23 @@ class ImageWindow(QMainWindow):
 		self.ui.label.moveFrame(QPoint(x, y))
 
 	def _toggleUnusedOriginals(self):
-		if self.viewOnlyUnusedOriginals:
-			self.viewOnlyUnusedOriginals = False
+		if self.viewMode == VIEW_UNUSED_ORIGINALS:
+			self.viewMode = VIEW_ALL
+			self.ui.mode.setText("")
 		else:
-			self.viewOnlyUnusedOriginals = True
+			self.viewMode = VIEW_UNUSED_ORIGINALS
+			self.ui.mode.setText("unused originals")
+
+	def _toggleCroppedImages(self):
+		if self.viewMode == VIEW_CROPPED:
+			self.viewMode = VIEW_UNCROPPED
+			self.ui.mode.setText("uncropped")
+		elif self.viewMode == VIEW_UNCROPPED:
+			self.viewMode = VIEW_ALL
+			self.ui.mode.setText("")
+		else:
+			self.viewMode = VIEW_CROPPED
+			self.ui.mode.setText("cropped")
 
 	def _removeImage(self):
 		backupPath, wallpaperPath = self._getPaths()

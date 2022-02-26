@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>803</width>
-    <height>471</height>
+    <width>880</width>
+    <height>490</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -53,17 +53,20 @@
        </layout>
       </item>
       <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+       <widget class="QLabel" name="mode">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
+        <property name="text">
+         <string/>
         </property>
-       </spacer>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -160,7 +163,7 @@
        <item>
         <widget class="QLabel" name="label_7">
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Shift + Arrow = move frame (or drag with mouse)&lt;br/&gt;Plus/Minus = grow/shrink (or mouse wheel)&lt;br/&gt;O = toggle original (if *)&lt;br/&gt;Space = toggle preview (cropped)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Shift + Arrow = move frame (or drag with mouse)&lt;br/&gt;Plus/Minus = grow/shrink (or mouse wheel)&lt;br/&gt;O = toggle original (if *)&lt;br/&gt;Space = toggle preview (cropped)&lt;br/&gt;Shift + C = toggle cropped images&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
