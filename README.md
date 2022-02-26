@@ -10,24 +10,13 @@ This source code is released under the MIT license (see LICENSE for details).
 
 # Dependencies
 
-## Ubuntu
-
-    sudo apt-get install python3-pyside
-
-## Mac
-
-There are binary packages but I found that they did not work.
-
-1. Install Qt 4 (I compiled from source, this may be required)
-2. Install python 3.4
-3. Download pyside 1.2.4 (to a location it can permanently live)
-4. Run python3.4 setup.py build
-5. Run python3.4 setup.py install
+PySide 6/Qt 6, PySide 2/Qt 5 or PySide/Qt 4
 
 
 # Installation
 
-1. Run ./build to convert .ui files to python
+1. Run ./build to convert .ui files to python (use -p pyside2 or -p pyside if
+   using older than PySide 6)
 2. Run ./wallpaper to start the program
 
 
