@@ -176,6 +176,7 @@ class ImageWindow(QMainWindow):
 		if modifiers & Qt.ControlModifier:
 			if   key == Qt.Key_S: 			self._useCroppedImage()				# control + S = use cropped image
 			elif key == Qt.Key_R: 			self._useOriginalImage()			# control + R = use original image
+			elif key == Qt.Key_A: 			self.ui.label.selectAll()			# control + A = select all
 			else: handled = False
 		elif modifiers & Qt.ShiftModifier:
 			if   key == Qt.Key_Right:		self._moveFrame(1, 0)				# Shift + Arrow = move frame (precise)
@@ -194,6 +195,7 @@ class ImageWindow(QMainWindow):
 			elif key == Qt.Key_O:			self._toggleOriginal()				# O = toggle original
 			elif key == Qt.Key_Space:		self._togglePreview()				# Space = toggle preview
 			elif key == Qt.Key_Backspace:	self._removeImage()					# Do not use image
+			elif key == Qt.Key_B:			self._toggleBackground()			# Toggle background colour
 			else: handled = False
 
 		if handled:
@@ -395,3 +397,10 @@ class ImageWindow(QMainWindow):
 			self.ui.help.show()
 		else:
 			self.ui.help.hide()
+
+	def _toggleBackground(self):
+		bg = Qt.black
+		if self.ui.label.paddingBackground == Qt.black:
+			bg = Qt.white
+		self.ui.label.paddingBackground = bg
+		self.ui.label._setPaddedFromImage()

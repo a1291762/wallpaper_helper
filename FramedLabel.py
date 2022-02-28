@@ -27,18 +27,22 @@ class FramedLabel(QLabel):
 
 	desktopWidth = 1
 	desktopHeight = 1
-	originalImage = None
-	desktopImage = None
-	clipRect = None
+	originalImage = None	# as-loaded
+	paddedImage = None		# padded so that the whole picture can be seen after clipping
+	clipRect = None			# defaults to part of the image (no padding visible)
+	preview = None			# a clipped copy of the image for better "full screen" preview
+	scaledImage = None		# the padded image scaled for display
+	paddingBackground = Qt.black
+
+	mouseDownPos = None
 	mousePos = None
-	preview = None
 
 	def __init__(self, text: str):
 		super().__init__(text)
 		self.setMinimumSize(1, 1) # allow resizing smaller
 
 	def setText(self, text):
-		self.preview = self.originalImage = self.desktopImage = self.clipRect = None
+		self.originalImage = self.paddedImage = self.clipRect = self.preview = self.scaledImage = None
 		super().setText(text)
 
 	def setImage(self, image: QImage):
@@ -53,21 +57,60 @@ class FramedLabel(QLabel):
 
 	def _resetImage(self):
 		if not (self.originalImage and self.desktopWidth and self.desktopHeight):
-			self.desktopImage = self.clipRect = None
+			self.paddedImage = self.clipRect = None
 			return
 
-		self.desktopImage = self.originalImage.scaled(
-			self.desktopWidth,
-			self.desktopHeight,
-			Qt.KeepAspectRatioByExpanding)
-		x = self.desktopImage.width() / 2.0 - self.desktopWidth / 2.0
-		y = self.desktopImage.height() / 2.0 - self.desktopHeight / 2.0
-		self.clipRect = QRect(x, y, self.desktopWidth, self.desktopHeight)
+		imageSize = self.originalImage.size()
+		clipWidth = imageSize.width()
+		clipHeight = imageSize.height()
+		paddedWidth = imageSize.width()
+		paddedHeight = imageSize.height()
+		if imageSize.width() / float(imageSize.height()) > self.desktopWidth / float(self.desktopHeight):
+			clipWidth = int(imageSize.height() / float(self.desktopHeight) * self.desktopWidth) + 1
+			paddedHeight = int(paddedWidth / float(self.desktopWidth) * self.desktopHeight) + 1
+		else:
+			clipHeight = int(imageSize.width() / float(self.desktopWidth) * self.desktopHeight) + 1
+			paddedWidth = int(paddedHeight / float(self.desktopHeight) * self.desktopWidth) + 1
+		#print(f"imageSize   {imageSize.width()} {imageSize.height()}")
+		#print(f"clip size   {clipWidth} {clipHeight}")
+		#print(f"padded size {paddedWidth} {paddedHeight}")
+
+		x = (paddedWidth / 2) - (clipWidth / 2)
+		if x < 0: x = 0
+		y = (paddedHeight / 2) - (clipHeight / 2)
+		if y < 0: y = 0
+
+		self.clipRect = QRect(x, y, clipWidth, clipHeight)
+		self._setPaddedFromImage()
+
+	def _setPaddedFromImage(self):
+		imageSize = self.originalImage.size()
+		paddedWidth = imageSize.width()
+		paddedHeight = imageSize.height()
+		if imageSize.width() / float(imageSize.height()) > self.desktopWidth / float(self.desktopHeight):
+			paddedHeight = int(paddedWidth / float(self.desktopWidth) * self.desktopHeight) + 1
+		else:
+			paddedWidth = int(paddedHeight / float(self.desktopHeight) * self.desktopWidth) + 1
+		#print(f"scaled size {paddedWidth} {paddedHeight}")
+
+		x = (paddedWidth / 2) - (imageSize.width() / 2)
+		if x < 0: x = 0
+		y = (paddedHeight / 2) - (imageSize.height() / 2)
+		if y < 0: y = 0
+
+		scaledPixmap = QPixmap(paddedWidth, paddedHeight)
+		scaledPixmap.fill(self.palette().color(self.backgroundRole()))
+		with QPainter(scaledPixmap) as p:
+			p.setPen(self.paddingBackground)
+			p.setBrush(self.paddingBackground)
+			p.drawRect(self.clipRect)
+			p.drawImage(x, y, self.originalImage)
+		self.paddedImage = scaledPixmap.toImage()
 		self._setPixmapFromImage()
 
 	def _setPixmapFromImage(self):
 		# Needs to be a pixmap for display
-		image = self.originalImage if not self.preview else self.preview
+		image = self.paddedImage if not self.preview else self.preview
 		self.scaledImage = image.scaled(
 			self.width(),
 			self.height(),
@@ -87,8 +130,7 @@ class FramedLabel(QLabel):
 			return
 
 		frameRect = self._calculateFrameRect(self.scaledImage.size(), self.size())
-		# drawRect wants the size to be one pixel less?
-		frameRect.adjust(0, 0, -1, -1)
+		frameRect.adjust(1, 1, 0, 0)
 		with QPainter(self) as p:
 			p.setPen(Qt.yellow)
 			p.drawRect(frameRect)
@@ -106,7 +148,7 @@ class FramedLabel(QLabel):
 		#print(f"The offset is {offset}")
 
 		#print(f"The clipRect is {self.clipRect}")
-		ratio = imageSize.width() / float(self.desktopImage.width())
+		ratio = imageSize.width() / float(self.paddedImage.width())
 		#print(f"ratio {ratio}")
 		x = self.clipRect.x() * ratio
 		y = self.clipRect.y() * ratio
@@ -120,32 +162,50 @@ class FramedLabel(QLabel):
 		#print(f"The frame rect is {rect}")
 		return rect
 
+	def labelToImage(self, pos):
+		x = pos.x()
+		y = pos.y()
+		x -= int((self.width() - self.scaledImage.width()) / 2.0)
+		y -= int((self.height() - self.scaledImage.height()) / 2.0)
+		return QPoint(x, y)
+
 	def mousePressEvent(self, e):
 		if self.scaledImage == None or self.preview:
 			return
-		#print(e.pos())
-		self.mousePos = e.pos()
+		pos = e.pos()
+		print(f"mousePressEvent {pos}")
+		self.mouseDownPos = pos
+		self.mousePos = pos
 
 	def mouseMoveEvent(self, e):
 		if self.scaledImage == None or self.preview:
 			return
-		#print(e.pos())
+		pos = e.pos()
+		print(f"mouseMoveEvent {pos}")
 		pos = self.mousePos
 		self.mousePos = e.pos()
 
 		movement = e.pos() - pos
-		#print(f"movement {movement}")
-		ratio = self.scaledImage.width() / float(self.desktopImage.width())
+		print(f"movement {movement}")
+		ratio = self.scaledImage.width() / float(self.paddedImage.width())
 		movement.setX(movement.x() / ratio)
 		movement.setY(movement.y() / ratio)
 
 		self.moveFrame(movement)
+		self._setPaddedFromImage()
 
 	def mouseReleaseEvent(self, e):
 		if self.scaledImage == None or self.preview:
 			return
-		#print(e.pos())
+		pos = e.pos()
+		print(f"mouseReleaseEvent {pos}")
+
+		if pos == self.mouseDownPos:
+			pixel = self.scaledImage.pixelColor(self.labelToImage(pos))
+			self.paddingBackground = pixel
+
 		self.mousePos = None
+		self._setPaddedFromImage()
 
 	def wheelEvent(self, e):
 		if self.scaledImage == None or self.preview:
@@ -161,9 +221,9 @@ class FramedLabel(QLabel):
 
 		# scale steps so that 50 steps == whole image (shortest size)
 		if self.desktopWidth > self.desktopHeight:
-			steps *= (self.desktopImage.height() / 50)
+			steps *= (self.paddedImage.height() / 50)
 		else:
-			steps *= (self.desktopImage.width() / 50)
+			steps *= (self.paddedImage.width() / 50)
 
 		# make sure steps is at least 1
 		if steps > -1 and steps < 0:
@@ -174,10 +234,10 @@ class FramedLabel(QLabel):
 		self.addPadding(steps)
 
 	def saveImage(self, fileName):
-		origSize = self.originalImage.size()
+		origSize = self.paddedImage.size()
 		rect = self._calculateFrameRect(origSize, origSize)
 		rect = rect.toRect() # can't use rectF with QImage
-		clipped = self.originalImage.copy(rect)
+		clipped = self.paddedImage.copy(rect)
 		clipped.save(fileName)
 
 	def addPadding(self, amount):
@@ -197,26 +257,27 @@ class FramedLabel(QLabel):
 		y = self.clipRect.y()
 
 		# Don't allow the border to go too big
-		if x + width > self.desktopImage.width():
-			width = self.desktopImage.width() - x
+		if x + width > self.paddedImage.width():
+			width = self.paddedImage.width() - x
 			height = width / float(self.desktopWidth) * self.desktopHeight
-		if y + height > self.desktopImage.height():
-			height = self.desktopImage.height() - y
+		if y + height > self.paddedImage.height():
+			height = self.paddedImage.height() - y
 			width = height / float(self.desktopHeight) * self.desktopWidth
 
 		self.clipRect.setWidth(width)
 		self.clipRect.setHeight(height)
-		self.update()
+		self._setPaddedFromImage()
+		#self.update()
 
 	def togglePreview(self):
 		if self.preview:
 			self.preview = None
 			self._setPixmapFromImage()
 		else:
-			origSize = self.originalImage.size()
+			origSize = self.paddedImage.size()
 			rect = self._calculateFrameRect(origSize, origSize)
 			rect = rect.toRect() # can't use rectF with QImage
-			self.preview = self.originalImage.copy(rect)
+			self.preview = self.paddedImage.copy(rect)
 			self._setPixmapFromImage()
 
 	def toggleOriginal(self, original):
@@ -232,16 +293,44 @@ class FramedLabel(QLabel):
 	def moveFrame(self, movement):
 		# This is where the user has moved the clip rect to...
 		topLeft = self.clipRect.topLeft() + movement
+
+		min_x = 0
+		min_y = 0
+		max_x = self.originalImage.width() - self.clipRect.width()
+		max_y = self.originalImage.height() - self.clipRect.height()
+
+		# print(f"moveFrame {min_x} {min_y} {max_x} {max_y}")
+		if self.paddedImage.width() > self.originalImage.width():
+			min_x = int((self.paddedImage.width() - self.originalImage.width()) / 2.0)
+			max_x += min_x
+			if self.clipRect.width() > self.originalImage.width():
+				diff = self.clipRect.width() - self.originalImage.width()
+				min_x -= diff
+				max_x += diff
+				if min_x < 0: min_x = 0
+				if max_x > self.paddedImage.width() - self.clipRect.width(): max_x = self.paddedImage.width() - self.clipRect.width()
+		if self.paddedImage.height() > self.originalImage.height():
+			min_y = int((self.paddedImage.height() - self.originalImage.height()) / 2.0)
+			max_y += min_y
+			if self.clipRect.height() > self.originalImage.height():
+				diff = self.clipRect.height() - self.originalImage.height()
+				min_y -= diff
+				max_y += diff
+				if min_y < 0: min_y = 0
+				if max_y > self.paddedImage.height() - self.clipRect.height(): max_y = self.paddedImage.height() - self.clipRect.height()
+		# print(f"adjusted {min_x} {min_y} {max_x} {max_y}")
+
 		# Don't allow the user to drag the clip rect off of the image
-		if topLeft.x() < 0:
-			topLeft.setX(0)
-		if topLeft.y() < 0:
-			topLeft.setY(0)
-		if topLeft.x() + self.clipRect.width() > self.desktopImage.width():
-			topLeft.setX(self.desktopImage.width() - self.clipRect.width())
-		if topLeft.y() + self.clipRect.height() > self.desktopImage.height():
-			topLeft.setY(self.desktopImage.height() - self.clipRect.height())
+		# print(f"topLeft {topLeft}")
+		if topLeft.x() < min_x: topLeft.setX(min_x)
+		if topLeft.y() < min_y: topLeft.setY(min_y)
+		if topLeft.x() > max_x: topLeft.setX(max_x)
+		if topLeft.y() > max_y: topLeft.setY(max_y)
+		# print(f"adjusted {topLeft}")
 
 		self.clipRect.moveTopLeft(topLeft)
 		self.update()
 
+	def selectAll(self):
+		self.clipRect = QRect(QPoint(0, 0), self.paddedImage.size())
+		self._setPaddedFromImage()
