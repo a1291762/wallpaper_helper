@@ -163,7 +163,7 @@
        <item>
         <widget class="QLabel" name="label_7">
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Shift + Arrow = move frame (or drag with mouse)&lt;br/&gt;Plus/Minus = grow/shrink (or mouse wheel)&lt;br/&gt;O = toggle original (if *)&lt;br/&gt;Space = toggle preview (cropped)&lt;br/&gt;B = toggle background (padding) colour&lt;br/&gt;Click = set background colour to value under the cursor&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Shift + Arrow = move frame (or drag with mouse)&lt;br/&gt;Plus/Minus = grow/shrink (or mouse wheel)&lt;br/&gt;O = toggle original (if *)&lt;br/&gt;Space = toggle preview (cropped)&lt;br/&gt;B = toggle background (padding) colour&lt;br/&gt;Click = set background colour to value under the cursor&lt;br/&gt;Shift + Drag = Erase part of the image&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>

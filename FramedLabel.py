@@ -34,6 +34,9 @@ class FramedLabel(QLabel):
 	scaledImage = None		# the padded image scaled for display
 	paddingBackground = Qt.black
 
+	movingFrame = False
+	tmpEraseRect = None		# for drawing the drag
+	eraseRect = None		# used when saving the image
 	mouseDownPos = None
 	mousePos = None
 
@@ -56,6 +59,7 @@ class FramedLabel(QLabel):
 		self._resetImage()
 
 	def _resetImage(self):
+		self.eraseRect = None
 		if not (self.originalImage and self.desktopWidth and self.desktopHeight):
 			self.paddedImage = self.clipRect = None
 			return
@@ -105,6 +109,8 @@ class FramedLabel(QLabel):
 			p.setBrush(self.paddingBackground)
 			p.drawRect(self.clipRect)
 			p.drawImage(x, y, self.originalImage)
+			if self.eraseRect is not None:
+				p.drawRect(self.eraseRect)
 		self.paddedImage = scaledPixmap.toImage()
 		self._setPixmapFromImage()
 
@@ -134,6 +140,12 @@ class FramedLabel(QLabel):
 		with QPainter(self) as p:
 			p.setPen(Qt.yellow)
 			p.drawRect(frameRect)
+
+		if self.tmpEraseRect is not None:
+			with QPainter(self) as p:
+				p.setPen(self.paddingBackground)
+				p.setBrush(self.paddingBackground)
+				p.drawRect(self.tmpEraseRect)
 
 	def _calculateFrameRect(self, imageSize, selfSize):
 		"""self.clipRect needs to be scaled down to fit the display size"""
@@ -177,22 +189,34 @@ class FramedLabel(QLabel):
 		self.mouseDownPos = pos
 		self.mousePos = pos
 
+		if (QGuiApplication.keyboardModifiers() & Qt.ShiftModifier) != 0:
+			self.tmpEraseRect = QRect(pos, pos)
+
 	def mouseMoveEvent(self, e):
 		if self.scaledImage == None or self.preview:
 			return
 		pos = e.pos()
 		print(f"mouseMoveEvent {pos}")
-		pos = self.mousePos
-		self.mousePos = e.pos()
 
-		movement = e.pos() - pos
-		print(f"movement {movement}")
-		ratio = self.scaledImage.width() / float(self.paddedImage.width())
-		movement.setX(movement.x() / ratio)
-		movement.setY(movement.y() / ratio)
+		if self.tmpEraseRect is None:
+			self.movingFrame = True
+		else:
+			self.tmpEraseRect.setBottomRight(e.pos())
+			print(f"eraseRect {self.tmpEraseRect}")
+			self.update()
 
-		self.moveFrame(movement)
-		self._setPaddedFromImage()
+		if self.movingFrame:
+			pos = self.mousePos
+			self.mousePos = e.pos()
+
+			movement = e.pos() - pos
+			print(f"movement {movement}")
+			ratio = self.scaledImage.width() / float(self.paddedImage.width())
+			movement.setX(movement.x() / ratio)
+			movement.setY(movement.y() / ratio)
+
+			self.moveFrame(movement)
+			self._setPaddedFromImage()
 
 	def mouseReleaseEvent(self, e):
 		if self.scaledImage == None or self.preview:
@@ -200,7 +224,18 @@ class FramedLabel(QLabel):
 		pos = e.pos()
 		print(f"mouseReleaseEvent {pos}")
 
-		if pos == self.mouseDownPos:
+		if self.movingFrame:
+			self.movingFrame = False
+		elif self.tmpEraseRect is not None:
+			ratio = self.paddedImage.width() / float(self.scaledImage.width())
+			topLeft = self.labelToImage(self.tmpEraseRect.topLeft())
+			x = topLeft.x() * ratio
+			y = topLeft.y() * ratio
+			w = self.tmpEraseRect.width() * ratio
+			h = self.tmpEraseRect.height() * ratio
+			self.eraseRect = QRect(x, y, w, h)
+			self.tmpEraseRect = None
+		elif pos == self.mouseDownPos:
 			pixel = self.scaledImage.pixelColor(self.labelToImage(pos))
 			self.paddingBackground = pixel
 
