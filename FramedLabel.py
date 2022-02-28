@@ -185,7 +185,7 @@ class FramedLabel(QLabel):
 		if self.scaledImage == None or self.preview:
 			return
 		pos = e.pos()
-		print(f"mousePressEvent {pos}")
+		#print(f"mousePressEvent {pos}")
 		self.mouseDownPos = pos
 		self.mousePos = pos
 
@@ -196,13 +196,13 @@ class FramedLabel(QLabel):
 		if self.scaledImage == None or self.preview:
 			return
 		pos = e.pos()
-		print(f"mouseMoveEvent {pos}")
+		#print(f"mouseMoveEvent {pos}")
 
 		if self.tmpEraseRect is None:
 			self.movingFrame = True
 		else:
 			self.tmpEraseRect.setBottomRight(e.pos())
-			print(f"eraseRect {self.tmpEraseRect}")
+			#print(f"eraseRect {self.tmpEraseRect}")
 			self.update()
 
 		if self.movingFrame:
@@ -210,7 +210,7 @@ class FramedLabel(QLabel):
 			self.mousePos = e.pos()
 
 			movement = e.pos() - pos
-			print(f"movement {movement}")
+			#print(f"movement {movement}")
 			ratio = self.scaledImage.width() / float(self.paddedImage.width())
 			movement.setX(movement.x() / ratio)
 			movement.setY(movement.y() / ratio)
@@ -222,7 +222,7 @@ class FramedLabel(QLabel):
 		if self.scaledImage == None or self.preview:
 			return
 		pos = e.pos()
-		print(f"mouseReleaseEvent {pos}")
+		#print(f"mouseReleaseEvent {pos}")
 
 		if self.movingFrame:
 			self.movingFrame = False
