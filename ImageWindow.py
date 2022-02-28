@@ -348,7 +348,12 @@ class ImageWindow(QMainWindow):
 			if self.ui.label.toggleOriginal(backupPath):
 				self.setWindowTitle(backupPath)
 			else:
-				self.setWindowTitle(self.imagePath+"*")
+				title = self.imagePath
+				if self.imagePath != backupPath and \
+					os.path.isfile(backupPath) and \
+						not filecmp.cmp(self.imagePath, backupPath):
+					title += "*"
+				self.setWindowTitle(title)
 
 	def _moveFrame(self, x, y):
 		self.ui.label.moveFrame(QPoint(x, y))
