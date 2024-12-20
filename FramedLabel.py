@@ -189,7 +189,7 @@ class FramedLabel(QLabel):
 		self.mouseDownPos = pos
 		self.mousePos = pos
 
-		if (QGuiApplication.keyboardModifiers() & Qt.ShiftModifier) != 0:
+		if (QGuiApplication.keyboardModifiers() & Qt.ShiftModifier) != Qt.KeyboardModifier.NoModifier:
 			self.tmpEraseRect = QRect(pos, pos)
 
 	def mouseMoveEvent(self, e):
